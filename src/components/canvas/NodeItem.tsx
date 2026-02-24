@@ -102,6 +102,23 @@ export default function NodeItem({
   const [newTaskTitle, setNewTaskTitle] = useState('')
   const [isAddingTask, setIsAddingTask] = useState(false)
 
+  const callbacksRef = useRef({
+    onPointerDownAction,
+    onMove,
+    onMoveEnd,
+    onResize,
+    onResizeEnd,
+  })
+
+  // Synchronously update callbacks ref on each render to avoid stale closures in event listeners
+  callbacksRef.current = {
+    onPointerDownAction,
+    onMove,
+    onMoveEnd,
+    onResize,
+    onResizeEnd,
+  }
+
   const funnel = funnels.find((f) => f.nodes.some((n) => n.id === node.id))
   const linkedTasks = tasks.filter(
     (t) => t.nodeId === node.id || node.data.linkedTaskIds?.includes(t.id),
@@ -176,7 +193,7 @@ export default function NodeItem({
     e.stopPropagation()
     target.setPointerCapture(e.pointerId)
     setIsDragging(true)
-    onPointerDownAction(e.shiftKey)
+    callbacksRef.current.onPointerDownAction(e.shiftKey)
     document.body.style.userSelect = 'none'
 
     const startX = e.clientX
@@ -193,7 +210,7 @@ export default function NodeItem({
         dx = snappedX - initialNodeX
         dy = snappedY - initialNodeY
       }
-      onMove(dx, dy)
+      callbacksRef.current.onMove(dx, dy)
     }
 
     const handlePointerUp = (upEv: PointerEvent) => {
@@ -212,7 +229,7 @@ export default function NodeItem({
         dx = snappedX - initialNodeX
         dy = snappedY - initialNodeY
       }
-      onMoveEnd(dx, dy)
+      callbacksRef.current.onMoveEnd(dx, dy)
       window.removeEventListener('pointermove', handlePointerMove)
       window.removeEventListener('pointerup', handlePointerUp)
       window.removeEventListener('pointercancel', handlePointerUp)
@@ -228,7 +245,7 @@ export default function NodeItem({
     const target = e.target as HTMLElement
     target.setPointerCapture(e.pointerId)
     setIsResizing(true)
-    onPointerDownAction(e.shiftKey)
+    callbacksRef.current.onPointerDownAction(e.shiftKey)
     document.body.style.userSelect = 'none'
 
     const startX = e.clientX
@@ -274,7 +291,7 @@ export default function NodeItem({
         newH = Math.round(newH / 28) * 28
       }
 
-      onResize?.(newX, newY, newW, newH)
+      callbacksRef.current.onResize?.(newX, newY, newW, newH)
     }
 
     const handlePointerUp = (upEv: PointerEvent) => {
@@ -319,7 +336,7 @@ export default function NodeItem({
         newW = Math.round(newW / 28) * 28
         newH = Math.round(newH / 28) * 28
       }
-      onResizeEnd?.(newX, newY, newW, newH)
+      callbacksRef.current.onResizeEnd?.(newX, newY, newW, newH)
       window.removeEventListener('pointermove', handlePointerMove)
       window.removeEventListener('pointerup', handlePointerUp)
       window.removeEventListener('pointercancel', handlePointerUp)
@@ -370,7 +387,7 @@ export default function NodeItem({
           'absolute top-0 left-0 pointer-events-auto min-w-[50px] p-2 z-10 group outline-none',
           selected && 'ring-2 ring-purple-500/60 shadow-lg rounded-md',
           isDragging
-            ? 'opacity-90 scale-[1.02] z-50 cursor-grabbing'
+            ? 'opacity-95 scale-[1.02] z-50 cursor-grabbing shadow-xl ring-2 ring-purple-500/30 rounded-md'
             : isPanMode
               ? 'cursor-grab'
               : isSelectMode
@@ -477,7 +494,7 @@ export default function NodeItem({
           'absolute top-0 left-0 pointer-events-auto flex items-center justify-center z-10 group text-slate-700',
           selected && 'shadow-md',
           isDragging || isResizing
-            ? 'opacity-90 z-50 shadow-lg cursor-grabbing scale-[1.02]'
+            ? 'opacity-95 z-50 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] cursor-grabbing scale-[1.02]'
             : isPanMode
               ? 'cursor-grab'
               : isSelectMode
@@ -654,7 +671,7 @@ export default function NodeItem({
           'absolute top-0 left-0 pointer-events-auto min-w-[150px] max-w-[400px] p-4 bg-yellow-50/90 backdrop-blur-sm rounded-xl shadow-sm border border-yellow-200 text-slate-800 z-10 group',
           selected && 'ring-2 ring-purple-500/60 shadow-md',
           isDragging
-            ? 'opacity-90 scale-[1.02] z-50 cursor-grabbing shadow-lg'
+            ? 'opacity-95 scale-[1.02] z-50 cursor-grabbing shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] ring-2 ring-purple-500/50'
             : isPanMode
               ? 'cursor-grab'
               : isSelectMode
@@ -728,7 +745,7 @@ export default function NodeItem({
           selected &&
             'ring-4 ring-purple-500/40 border-purple-500/50 shadow-md',
           isDragging
-            ? 'opacity-90 scale-[1.02] z-50 cursor-grabbing shadow-lg'
+            ? 'opacity-95 scale-[1.02] z-50 cursor-grabbing shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] ring-4 ring-purple-500/50'
             : isPanMode
               ? 'cursor-grab'
               : isSelectMode
@@ -790,7 +807,7 @@ export default function NodeItem({
         selected &&
           'shadow-[0_8px_30px_rgba(0,0,0,0.12)] ring-2 ring-purple-500/40 border-purple-500/50',
         isDragging &&
-          'opacity-90 scale-[1.02] z-50 shadow-[0_12px_40px_rgba(0,0,0,0.1)]',
+          'opacity-95 scale-[1.03] z-50 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] ring-2 ring-purple-500/50 border-purple-500/50',
         node.data.isTaskMode && node.data.isCompleted
           ? 'bg-[#ecfdf5] border-[#bbf7d0]'
           : (node.style?.fill && node.style.fill !== 'transparent') ||

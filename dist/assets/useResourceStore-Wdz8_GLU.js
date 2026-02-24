@@ -1,0 +1,117 @@
+import { M as createStore, bt as createLucideIcon } from "./index-DIapPH61.js";
+var ExternalLink = createLucideIcon("external-link", [
+	["path", {
+		d: "M15 3h6v6",
+		key: "1q9fwt"
+	}],
+	["path", {
+		d: "M10 14 21 3",
+		key: "gplh6r"
+	}],
+	["path", {
+		d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6",
+		key: "a6xqqp"
+	}]
+]);
+var Grid3x3 = createLucideIcon("grid-3x3", [
+	["rect", {
+		width: "18",
+		height: "18",
+		x: "3",
+		y: "3",
+		rx: "2",
+		key: "afitv7"
+	}],
+	["path", {
+		d: "M3 9h18",
+		key: "1pudct"
+	}],
+	["path", {
+		d: "M3 15h18",
+		key: "5xshup"
+	}],
+	["path", {
+		d: "M9 3v18",
+		key: "fh3hqa"
+	}],
+	["path", {
+		d: "M15 3v18",
+		key: "14nvp0"
+	}]
+]);
+var Image = createLucideIcon("image", [
+	["rect", {
+		width: "18",
+		height: "18",
+		x: "3",
+		y: "3",
+		rx: "2",
+		ry: "2",
+		key: "1m3agn"
+	}],
+	["circle", {
+		cx: "9",
+		cy: "9",
+		r: "2",
+		key: "af1f0g"
+	}],
+	["path", {
+		d: "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21",
+		key: "1xmnt7"
+	}]
+]);
+var useResourceStore_default = createStore("funilos_resources", [
+	{
+		id: "res1",
+		projectId: "p1",
+		type: "image",
+		title: "Banner Hero",
+		content: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=600",
+		tags: ["hero", "lançamento"],
+		isPinned: true,
+		createdAt: "2026-02-20T10:00:00Z"
+	},
+	{
+		id: "res2",
+		projectId: "p1",
+		type: "link",
+		title: "Referência de Landing Page",
+		content: "https://stripe.com",
+		tags: ["referência", "landing"],
+		isPinned: false,
+		createdAt: "2026-02-19T10:00:00Z"
+	},
+	{
+		id: "res3",
+		projectId: "p1",
+		type: "note",
+		title: "Insight: Copy que converte",
+		content: "Usar linguagem direta focada em benefício. Frases curtas. CTA acima da dobra. Prova social logo abaixo do hero.",
+		tags: ["copy", "insight"],
+		isPinned: true,
+		createdAt: "2026-02-18T10:00:00Z"
+	},
+	{
+		id: "res4",
+		projectId: "p2",
+		type: "image",
+		title: "Mockup do Produto",
+		content: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600",
+		tags: ["mockup", "app"],
+		isPinned: false,
+		createdAt: "2026-02-17T10:00:00Z"
+	},
+	{
+		id: "res5",
+		projectId: "p1",
+		type: "note",
+		title: "Swipe: Headline viral",
+		content: "A fórmula \"Número + Adjetivo + Resultado + Tempo\" funciona muito bem. Ex: \"7 formas simples de dobrar suas vendas em 30 dias\".",
+		tags: ["swipe", "headline"],
+		isPinned: false,
+		createdAt: "2026-02-16T10:00:00Z"
+	}
+]);
+export { ExternalLink as i, Image as n, Grid3x3 as r, useResourceStore_default as t };
+
+//# sourceMappingURL=useResourceStore-Wdz8_GLU.js.map

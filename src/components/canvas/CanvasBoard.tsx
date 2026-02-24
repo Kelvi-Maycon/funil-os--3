@@ -24,9 +24,6 @@ import {
   Square,
   Diamond,
   Circle,
-  X,
-  Undo2,
-  Redo2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -102,12 +99,11 @@ export default function CanvasBoard({
   const [docs, setDocs] = useDocumentStore()
   const [resources, setResources] = useResourceStore()
   const { toast } = useToast()
-  const { pushState, undo, redo, canUndo, canRedo } = useCanvasHistory(funnel)
+  const { pushState, undo, redo } = useCanvasHistory(funnel)
   const [nodeToDelete, setNodeToDelete] = useState<string | 'selected' | null>(
     null,
   )
 
-  // Wrap onChange to push state for undo/redo
   const onChangeWithHistory = useCallback(
     (newFunnel: Funnel) => {
       pushState(funnel)
@@ -192,19 +188,26 @@ export default function CanvasBoard({
         setSearchParams(searchParams, { replace: true })
       }
     }
-  }, [targetNodeId, funnel.nodes, searchParams, setSearchParams])
+  }, [
+    targetNodeId,
+    funnel.nodes,
+    searchParams,
+    setSearchParams,
+    setSelectedNodes,
+    setTransform,
+  ])
 
   const handleGroupSelected = useCallback(() => {
     if (selectedNodes.length < 2) return
     const groupId = generateId('g')
-    onChange({
+    onChangeWithHistory({
       ...funnel,
       nodes: funnel.nodes.map((n) =>
         selectedNodes.includes(n.id) ? { ...n, groupId } : n,
       ),
     })
     toast({ title: 'Elementos agrupados.' })
-  }, [funnel, selectedNodes, onChange, toast])
+  }, [funnel, selectedNodes, onChangeWithHistory, toast])
 
   const handleDeleteSelected = useCallback(() => {
     if (selectedNodes.length === 0) return
@@ -228,6 +231,7 @@ export default function CanvasBoard({
     onChangeWithHistory,
     rightPanelState,
     settingsNodeId,
+    setSelectedNodes,
   ])
 
   const handleConfirmDelete = useCallback(() => {
@@ -317,7 +321,15 @@ export default function CanvasBoard({
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [handleDeleteSelected, handleGroupSelected])
+  }, [
+    handleDeleteSelected,
+    handleGroupSelected,
+    selectedNodes.length,
+    undo,
+    redo,
+    funnel,
+    onChange,
+  ])
 
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
@@ -351,7 +363,7 @@ export default function CanvasBoard({
               linkedAssetIds: [newAsset.id],
             },
           }
-          onChange({ ...funnel, nodes: [...funnel.nodes, newNode] })
+          onChangeWithHistory({ ...funnel, nodes: [...funnel.nodes, newNode] })
           setSelectedNodes([newNode.id])
           toast({ title: 'Imagem colada no canvas!' })
         }
@@ -359,7 +371,14 @@ export default function CanvasBoard({
     }
     window.addEventListener('paste', handlePaste)
     return () => window.removeEventListener('paste', handlePaste)
-  }, [funnel, setResources, transform, onChange, toast])
+  }, [
+    funnel,
+    setResources,
+    transform,
+    onChangeWithHistory,
+    setSelectedNodes,
+    toast,
+  ])
 
   useEffect(() => {
     const el = boardRef.current
@@ -389,7 +408,7 @@ export default function CanvasBoard({
     }
     el.addEventListener('wheel', onWheel, { passive: false })
     return () => el.removeEventListener('wheel', onWheel)
-  }, [])
+  }, [setTransform])
 
   const handlePointerDown = (e: React.PointerEvent) => {
     const isCanvasBg =
@@ -504,7 +523,7 @@ export default function CanvasBoard({
 
       if (width > 10 && height > 10) {
         const newNodeId = generateId('n')
-        onChange({
+        onChangeWithHistory({
           ...funnel,
           nodes: [
             ...funnel.nodes,
@@ -572,7 +591,7 @@ export default function CanvasBoard({
       y = Math.round(y / 28) * 28
     }
     const newNodeId = generateId('n')
-    onChange({
+    onChangeWithHistory({
       ...funnel,
       nodes: [
         ...funnel.nodes,
@@ -618,7 +637,7 @@ export default function CanvasBoard({
             (edge) => edge.source === nodeId && edge.target === targetId,
           )
         ) {
-          onChange({
+          onChangeWithHistory({
             ...funnel,
             edges: [
               ...funnel.edges,
@@ -647,7 +666,7 @@ export default function CanvasBoard({
       newX = Math.round(newX / 28) * 28
       newY = Math.round(newY / 28) * 28
     }
-    onChange({
+    onChangeWithHistory({
       ...funnel,
       nodes: [
         ...funnel.nodes,
@@ -668,7 +687,7 @@ export default function CanvasBoard({
 
   const handleAddAnnotation = (type: 'Text' | 'Image', name: string) => {
     const newNodeId = generateId('n')
-    onChange({
+    onChangeWithHistory({
       ...funnel,
       nodes: [
         ...funnel.nodes,
@@ -700,7 +719,7 @@ export default function CanvasBoard({
       }
       return n
     })
-    onChange({ ...funnel, nodes: updatedNodes })
+    onChangeWithHistory({ ...funnel, nodes: updatedNodes })
 
     if (type === 'document')
       setDocs(
@@ -724,7 +743,7 @@ export default function CanvasBoard({
 
   const updateEdgeStyle = (styleUpdates: Partial<Edge['style']>) => {
     if (selectedEdge) {
-      onChange({
+      onChangeWithHistory({
         ...funnel,
         edges: funnel.edges.map((e) =>
           e.id === selectedEdge
@@ -737,7 +756,7 @@ export default function CanvasBoard({
 
   const updateNodeStyle = (updates: Partial<Node['style']>) => {
     if (selectedNodes.length > 0) {
-      onChange({
+      onChangeWithHistory({
         ...funnel,
         nodes: funnel.nodes.map((n) =>
           selectedNodes.includes(n.id)
@@ -1553,7 +1572,7 @@ export default function CanvasBoard({
               y = Math.round(y / 28) * 28
             }
             const newNodeId = generateId('n')
-            onChange({
+            onChangeWithHistory({
               ...funnel,
               nodes: [
                 ...funnel.nodes,
@@ -1748,10 +1767,10 @@ export default function CanvasBoard({
                   onMoveEnd={(dx, dy) => {
                     setDragState(null)
                     if (dx === 0 && dy === 0) return
-                    onChange({
+                    onChangeWithHistory({
                       ...funnel,
                       nodes: funnel.nodes.map((node) =>
-                        selectedNodes.includes(node.id)
+                        selectedNodes.includes(node.id) || node.id === n.id
                           ? { ...node, x: node.x + dx, y: node.y + dy }
                           : node,
                       ),
@@ -1762,7 +1781,7 @@ export default function CanvasBoard({
                   }
                   onResizeEnd={(x, y, w, h) => {
                     setResizingNode(null)
-                    onChange({
+                    onChangeWithHistory({
                       ...funnel,
                       nodes: funnel.nodes.map((node) =>
                         node.id === n.id
@@ -1782,7 +1801,7 @@ export default function CanvasBoard({
                   }
                   onOpenSettings={() => setSettingsNodeId(n.id)}
                   onToggleComplete={() =>
-                    onChange({
+                    onChangeWithHistory({
                       ...funnel,
                       nodes: funnel.nodes.map((node) =>
                         node.id === n.id
@@ -1799,7 +1818,7 @@ export default function CanvasBoard({
                   }
                   scale={transform.scale}
                   onTextChange={(text) =>
-                    onChange({
+                    onChangeWithHistory({
                       ...funnel,
                       nodes: funnel.nodes.map((node) =>
                         node.id === n.id
@@ -1826,7 +1845,7 @@ export default function CanvasBoard({
             funnel={funnel}
             defaultTab={rightPanelState.tab}
             onChange={(n) =>
-              onChange({
+              onChangeWithHistory({
                 ...funnel,
                 nodes: funnel.nodes.map((node) =>
                   node.id === n.id ? n : node,
@@ -1845,7 +1864,7 @@ export default function CanvasBoard({
         isOpen={!!settingsNodeId}
         onClose={() => setSettingsNodeId(null)}
         onSave={(id, updates) => {
-          onChange({
+          onChangeWithHistory({
             ...funnel,
             nodes: funnel.nodes.map((n) =>
               n.id === id ? { ...n, data: { ...n.data, ...updates } } : n,
