@@ -1,49 +1,48 @@
-import { useSyncExternalStore, useCallback } from 'react'
+import { useSyncExternalStore } from 'react'
 
-export function createStore<T>(key: string, initialData: T) {
-  let memoryState: T = initialData
+export function createStore<T>(name: string, initialValue: T) {
+  let state = initialValue
+
+  try {
+    if (typeof window !== 'undefined') {
+      const stored = window.localStorage.getItem(name)
+      if (stored) {
+        state = JSON.parse(stored)
+      }
+    }
+  } catch (err) {
+    console.error(err)
+  }
+
   const listeners = new Set<() => void>()
 
-  const stored = localStorage.getItem(key)
-  if (stored) {
-    try {
-      memoryState = JSON.parse(stored)
-    } catch (e) {
-      console.error('Failed to parse', key)
-    }
-  } else {
-    localStorage.setItem(key, JSON.stringify(memoryState))
-  }
-
-  function getSnapshot() {
-    return memoryState
-  }
-
-  function setState(newState: T | ((prev: T) => T)) {
-    memoryState =
-      typeof newState === 'function'
-        ? (newState as (prev: T) => T)(memoryState)
-        : newState
-    localStorage.setItem(key, JSON.stringify(memoryState))
-    listeners.forEach((l) => l())
-  }
-
-  function subscribe(listener: () => void) {
+  const subscribe = (listener: () => void) => {
     listeners.add(listener)
-    return () => {
-      listeners.delete(listener)
-    }
+    return () => listeners.delete(listener)
   }
 
-  function useStore(): readonly [T, typeof setState]
-  function useStore<S>(selector: (state: T) => S): S
-  function useStore<S>(selector?: (state: T) => S) {
-    if (selector) {
-      const sel = selector
-      return useSyncExternalStore(subscribe, () => sel(getSnapshot()))
+  const getSnapshot = () => state
+
+  const setState = (newValue: T | ((prev: T) => T)) => {
+    state = typeof newValue === 'function' ? (newValue as any)(state) : newValue
+    try {
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(name, JSON.stringify(state))
+      }
+    } catch (err) {
+      console.error(err)
     }
-    const state = useSyncExternalStore(subscribe, getSnapshot)
-    return [state, setState] as const
+    listeners.forEach((listener) => listener())
+  }
+
+  function useStore(): [T, typeof setState]
+  function useStore<U>(selector: (state: T) => U): U
+  function useStore<U>(selector?: (state: T) => U) {
+    const snapshot = useSyncExternalStore(subscribe, getSnapshot)
+    if (selector) {
+      return selector(snapshot) as U
+    }
+    return [snapshot, setState] as any
   }
 
   return useStore
