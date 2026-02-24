@@ -124,7 +124,7 @@ export default function TaskDetailSheet({
           )}
         </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-8">
+        <div className="flex-1 overflow-y-auto p-6 space-y-8 no-scrollbar">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-xs font-medium text-muted-foreground flex items-center gap-2">

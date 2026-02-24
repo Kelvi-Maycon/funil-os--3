@@ -132,7 +132,7 @@ export default function Layout() {
           </div>
           <SidebarTrigger />
         </header>
-        <main className="flex-1 overflow-auto animate-fade-in relative flex flex-col">
+        <main className="flex-1 overflow-auto animate-fade-in relative flex flex-col no-scrollbar">
           <Outlet />
         </main>
       </SidebarInset>

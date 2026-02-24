@@ -100,7 +100,7 @@ export default function TasksBoard({
   }
 
   return (
-    <div className="flex gap-6 overflow-x-auto pb-4 h-full min-h-[500px] items-start">
+    <div className="flex gap-6 overflow-x-auto pb-4 h-full min-h-[500px] items-start no-scrollbar">
       {columnsConfig.map((col) => {
         const colTasks = tasks.filter((t) => t.status === col.id)
         const isDragOver = dragOverCol === col.id
@@ -134,7 +134,7 @@ export default function TasksBoard({
                 <MoreHorizontal size={16} />
               </button>
             </div>
-            <div className="flex flex-col gap-3 flex-1 overflow-y-auto min-h-[100px] pb-4">
+            <div className="flex flex-col gap-3 flex-1 overflow-y-auto min-h-[100px] pb-4 no-scrollbar">
               {colTasks.map((t) => {
                 const pc = priorityConfig[t.priority]
                 const completedSubtasks =

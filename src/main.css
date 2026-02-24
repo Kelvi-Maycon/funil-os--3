@@ -50,6 +50,15 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
   }
+
+  /* Global scrollbar hiding to maintain clean UI */
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @layer utilities {

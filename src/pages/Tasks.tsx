@@ -54,7 +54,7 @@ export default function Tasks() {
           </TabsTrigger>
         </TabsList>
 
-        <div className="flex-1 overflow-auto -mx-4 px-4 pb-8">
+        <div className="flex-1 overflow-auto -mx-4 px-4 pb-8 no-scrollbar">
           <TabsContent
             value="overview"
             className="mt-0 h-full border-none outline-none"
