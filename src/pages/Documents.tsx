@@ -1,0 +1,354 @@
+import { useState } from 'react'
+import useDocumentStore from '@/stores/useDocumentStore'
+import useFolderStore from '@/stores/useFolderStore'
+import useQuickActionStore from '@/stores/useQuickActionStore'
+import RichTextEditor from '@/components/editor/RichTextEditor'
+import { Button } from '@/components/ui/button'
+import {
+  FileText,
+  Plus,
+  Folder as FolderIcon,
+  ChevronRight,
+  ChevronDown,
+  FolderPlus,
+  PanelLeftClose,
+  PanelLeft,
+  Search,
+} from 'lucide-react'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { cn } from '@/lib/utils'
+import { generateId } from '@/lib/generateId'
+
+export default function Documents() {
+  const [docs, setDocs] = useDocumentStore()
+  const [folders, setFolders] = useFolderStore()
+  const [, setAction] = useQuickActionStore()
+  const [activeId, setActiveId] = useState(docs[0]?.id)
+  const [newFolderOpen, setNewFolderOpen] = useState(false)
+  const [newFolderName, setNewFolderName] = useState('')
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [search, setSearch] = useState('')
+
+  const activeDoc = docs.find((d) => d.id === activeId)
+
+  const filteredDocs = search
+    ? docs.filter((d) => d.title.toLowerCase().includes(search.toLowerCase()))
+    : docs
+  const filteredFolders = search
+    ? folders.filter((f) => f.name.toLowerCase().includes(search.toLowerCase()))
+    : folders
+
+  const createDoc = () => {
+    setAction({ type: 'document', mode: 'create' })
+  }
+
+  const createFolder = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newFolderName.trim()) return
+    const newFolder = {
+      id: generateId('f'),
+      projectId: 'p1',
+      module: 'project' as const,
+      name: newFolderName,
+      parentId: null,
+      createdAt: new Date().toISOString(),
+      isExpanded: true,
+    }
+    setFolders([...folders, newFolder])
+    setNewFolderName('')
+    setNewFolderOpen(false)
+  }
+
+  const toggleFolder = (id: string) => {
+    setFolders(
+      folders.map((f) =>
+        f.id === id ? { ...f, isExpanded: !f.isExpanded } : f,
+      ),
+    )
+  }
+
+  const onDragStart = (e: React.DragEvent, type: string, id: string) => {
+    e.dataTransfer.setData('type', type)
+    e.dataTransfer.setData('id', id)
+  }
+
+  const onDrop = (e: React.DragEvent, targetFolderId: string | null) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const type = e.dataTransfer.getData('type')
+    const id = e.dataTransfer.getData('id')
+
+    if (type === 'document') {
+      setDocs(
+        docs.map((d) => (d.id === id ? { ...d, folderId: targetFolderId } : d)),
+      )
+    } else if (type === 'folder') {
+      if (id === targetFolderId) return
+      let currentParent = targetFolderId
+      let isDescendant = false
+      while (currentParent) {
+        if (currentParent === id) {
+          isDescendant = true
+          break
+        }
+        const parentFolder = folders.find((f) => f.id === currentParent)
+        currentParent = parentFolder ? parentFolder.parentId : null
+      }
+      if (!isDescendant) {
+        setFolders(
+          folders.map((f) =>
+            f.id === id ? { ...f, parentId: targetFolderId } : f,
+          ),
+        )
+      }
+    }
+  }
+
+  const onDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+  }
+
+  const renderTree = (parentId: string | null, level = 0) => {
+    const childFolders = filteredFolders.filter((f) => f.parentId === parentId)
+    const childDocs = filteredDocs.filter((d) => d.folderId === parentId)
+
+    return (
+      <div className="flex flex-col gap-1 mt-1">
+        {childFolders.map((folder) => (
+          <div key={folder.id} className="flex flex-col">
+            <div
+              draggable
+              onDragStart={(e) => onDragStart(e, 'folder', folder.id)}
+              onDrop={(e) => onDrop(e, folder.id)}
+              onDragOver={onDragOver}
+              className="group flex items-center gap-2 py-2 pr-3 rounded-lg text-md transition-colors cursor-pointer hover:bg-muted text-foreground select-none"
+              style={{ paddingLeft: `${level * 16 + 12}px` }}
+            >
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  toggleFolder(folder.id)
+                }}
+                className="p-1 hover:bg-border rounded-md text-muted-foreground shrink-0 transition-colors"
+              >
+                {folder.isExpanded ? (
+                  <ChevronDown size={14} />
+                ) : (
+                  <ChevronRight size={14} />
+                )}
+              </button>
+              <FolderIcon
+                size={16}
+                className="text-muted-foreground fill-muted-foreground/20 shrink-0"
+              />
+              <span className="truncate flex-1 font-semibold text-sm">
+                {folder.name}
+              </span>
+            </div>
+            {folder.isExpanded && renderTree(folder.id, level + 1)}
+          </div>
+        ))}
+        {childDocs.map((doc) => (
+          <button
+            key={doc.id}
+            draggable
+            onDragStart={(e) => onDragStart(e, 'document', doc.id)}
+            onClick={() => setActiveId(doc.id)}
+            className={cn(
+              'flex items-center gap-3 py-2 pr-3 rounded-lg text-base transition-colors w-full text-left cursor-grab active:cursor-grabbing select-none font-medium',
+              activeId === doc.id
+                ? 'bg-primary/10 text-primary'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+            )}
+            style={{
+              paddingLeft: `${level * 16 + (parentId === null ? 12 : 36)}px`,
+            }}
+          >
+            <FileText
+              size={16}
+              className={`shrink-0 ${activeId === doc.id ? 'text-primary' : 'text-slate-400'}`}
+            />
+            <span className="truncate flex-1 text-sm">{doc.title}</span>
+          </button>
+        ))}
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex h-full bg-background overflow-hidden animate-fade-in">
+      <div
+        className={cn(
+          'border-r border-border bg-card flex flex-col shrink-0 z-10 shadow-sm transition-all duration-300',
+          isSidebarOpen ? 'w-72' : 'w-[60px]',
+        )}
+      >
+        <div
+          className={cn(
+            'p-4 border-b border-border flex flex-col gap-3',
+            !isSidebarOpen && 'items-center px-2',
+          )}
+        >
+          <div
+            className={cn(
+              'flex items-center w-full',
+              isSidebarOpen ? 'justify-between' : 'justify-center',
+            )}
+          >
+            {isSidebarOpen && (
+              <span className="font-semibold text-sm text-foreground px-2">
+                Pastas
+              </span>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                'h-8 w-8 text-muted-foreground hover:text-foreground shrink-0 rounded-lg hover:bg-slate-200/50',
+                !isSidebarOpen && 'mb-2',
+              )}
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              title={isSidebarOpen ? 'Ocultar pastas' : 'Mostrar pastas'}
+            >
+              {isSidebarOpen ? (
+                <PanelLeftClose size={16} />
+              ) : (
+                <PanelLeft size={16} />
+              )}
+            </Button>
+          </div>
+
+          {isSidebarOpen ? (
+            <div className="flex flex-col gap-2 w-full animate-fade-in">
+              <Button
+                className="w-full justify-start shadow-sm font-semibold text-sm"
+                onClick={createDoc}
+              >
+                <Plus size={16} className="mr-2" /> Novo Documento
+              </Button>
+              <Dialog open={newFolderOpen} onOpenChange={setNewFolderOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-muted-foreground hover:text-foreground shadow-sm bg-background border-border text-sm"
+                  >
+                    <FolderPlus size={16} className="mr-2" /> Nova Pasta
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Criar Nova Pasta</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={createFolder} className="space-y-4 pt-6">
+                    <Input
+                      placeholder="Nome da Pasta"
+                      value={newFolderName}
+                      onChange={(e) => setNewFolderName(e.target.value)}
+                      autoFocus
+                    />
+                    <Button type="submit" className="w-full">
+                      Criar Pasta
+                    </Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+          ) : (
+            <Button
+              size="icon"
+              variant="default"
+              className="h-10 w-10 shrink-0 shadow-sm rounded-xl"
+              onClick={createDoc}
+              title="Novo Documento"
+            >
+              <Plus size={18} />
+            </Button>
+          )}
+        </div>
+
+        {isSidebarOpen && (
+          <div className="px-3 pb-1">
+            <div className="relative">
+              <Search
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                size={14}
+              />
+              <Input
+                placeholder="Buscar docs..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-8 h-8 text-sm bg-background"
+              />
+            </div>
+          </div>
+        )}
+
+        {isSidebarOpen ? (
+          <ScrollArea
+            className="flex-1 animate-fade-in"
+            onDrop={(e) => onDrop(e, null)}
+            onDragOver={onDragOver}
+          >
+            <div className="p-3 min-h-full">{renderTree(null)}</div>
+          </ScrollArea>
+        ) : (
+          <div className="flex-1 flex flex-col items-center pt-6 gap-6 animate-fade-in">
+            <div
+              className="p-2 rounded-xl bg-muted/50 text-muted-foreground cursor-pointer hover:bg-muted transition-colors"
+              title="Pastas ocultas"
+            >
+              <FolderIcon size={20} className="opacity-50" />
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="flex-1 overflow-hidden bg-[#f8fafc]">
+        {activeDoc ? (
+          <RichTextEditor
+            doc={activeDoc}
+            onTitleChange={(title) =>
+              setDocs(
+                docs.map((d) => (d.id === activeDoc.id ? { ...d, title } : d)),
+              )
+            }
+            onProjectChange={(projectId) =>
+              setDocs(
+                docs.map((d) =>
+                  d.id === activeDoc.id ? { ...d, projectId } : d,
+                ),
+              )
+            }
+            onChange={(content) =>
+              setDocs(
+                docs.map((d) =>
+                  d.id === activeDoc.id ? { ...d, content } : d,
+                ),
+              )
+            }
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full text-muted-foreground flex-col gap-4 max-w-lg mx-auto min-h-[400px]">
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-2">
+              <FileText size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-foreground">Documentos</h3>
+            <span className="text-base text-center">
+              Selecione um documento na barra lateral ou crie um novo.
+            </span>
+            <Button onClick={createDoc} className="mt-2 font-semibold">
+              <Plus size={16} className="mr-2" /> Novo Documento
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

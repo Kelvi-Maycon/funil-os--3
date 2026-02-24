@@ -1,4 +1,3 @@
-/* Tailwind config for the frontend react app. This is where the app theme should be defined: https://v2.tailwindcss.com/docs/configuration. */
 import type { Config } from 'tailwindcss'
 import animatePlugin from 'tailwindcss-animate'
 import typographyPlugin from '@tailwindcss/typography'
@@ -27,8 +26,18 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter var', 'SF Pro Display', 'system-ui', 'sans-serif'],
-        display: ['SF Pro Display', 'Inter var', 'system-ui', 'sans-serif'],
+        sans: ['DM Sans', 'system-ui', 'sans-serif'],
+      },
+      fontSize: {
+        xs: ['11px', { lineHeight: '14px', fontWeight: '600' }],
+        sm: ['13px', { lineHeight: '18px', fontWeight: '500' }],
+        base: ['15px', { lineHeight: '24px', fontWeight: '400' }],
+        md: ['15px', { lineHeight: '22px', fontWeight: '500' }],
+        lg: ['18px', { lineHeight: '26px', fontWeight: '600' }],
+        xl: ['20px', { lineHeight: '28px', fontWeight: '600' }],
+        '2xl': ['24px', { lineHeight: '32px', fontWeight: '700' }],
+        '3xl': ['28px', { lineHeight: '36px', fontWeight: '700' }],
+        '4xl': ['36px', { lineHeight: '44px', fontWeight: '700' }],
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -39,6 +48,7 @@ export default {
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
+          subtle: 'rgba(244, 81, 11, 0.08)',
         },
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
@@ -74,30 +84,34 @@ export default {
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))',
         },
-        chart: {
-          1: 'hsl(var(--chart-1))',
-          2: 'hsl(var(--chart-2))',
-          3: 'hsl(var(--chart-3))',
-          4: 'hsl(var(--chart-4))',
-          5: 'hsl(var(--chart-5))',
+        success: {
+          DEFAULT: '#22C55E',
+          foreground: '#15803D',
+          bg: '#ECFDF5',
+        },
+        warning: {
+          DEFAULT: '#F59E0B',
+          foreground: '#B45309',
+          bg: '#FFFBEB',
+        },
+        danger: {
+          DEFAULT: '#EF4444',
+          foreground: '#B91C1C',
+          bg: '#FEF2F2',
+        },
+        info: {
+          DEFAULT: '#3B82F6',
+          foreground: '#1D4ED8',
+          bg: '#EFF6FF',
         },
       },
       borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
-      },
-      transitionProperty: {
-        width: 'width',
-        height: 'height',
-      },
-      boxShadow: {
-        subtle:
-          '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03)',
-        elevation: '0 4px 20px rgba(0, 0, 0, 0.05)',
-      },
-      transitionTimingFunction: {
-        apple: 'cubic-bezier(0.42, 0, 0.58, 1)',
+        sm: '6px',
+        md: '10px',
+        lg: '14px',
+        xl: '18px',
+        '2xl': '24px',
+        full: '9999px',
       },
     },
   },
