@@ -13,7 +13,7 @@ import { ConfirmDialog } from '@/components/ConfirmDialog'
 import {
   Plus,
   Minus,
-  Map,
+  Map as MapIcon,
   Grid,
   Image as ImageIcon,
   MousePointer2,
@@ -1089,7 +1089,7 @@ export default function CanvasBoard({
               )}
               onClick={() => setShowMinimap(!showMinimap)}
             >
-              <Map size={18} />
+              <MapIcon size={18} />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">Minimap</TooltipContent>
