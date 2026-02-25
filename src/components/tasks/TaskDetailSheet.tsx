@@ -1,38 +1,23 @@
 import { useState, useEffect } from 'react'
 import { generateId } from '@/lib/generateId'
 import { useNavigate } from 'react-router-dom'
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Task, Subtask } from '@/types'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import {
-  Plus,
-  Trash2,
-  CalendarIcon,
-  User,
-  AlignLeft,
-  CheckSquare,
-  MessageSquare,
-  Folder,
+  Check,
+  Share2,
+  MoreHorizontal,
+  AtSign,
+  Paperclip,
+  Send,
   Network,
 } from 'lucide-react'
-import { format } from 'date-fns'
 import useProjectStore from '@/stores/useProjectStore'
+import { cn } from '@/lib/utils'
+import { TaskMetadata } from './TaskMetadata'
+import { TaskSubtasks } from './TaskSubtasks'
+import { TaskActivity } from './TaskActivity'
 
 export default function TaskDetailSheet({
   task,
@@ -51,14 +36,7 @@ export default function TaskDetailSheet({
     if (task) setLocalTask(task)
   }, [task])
 
-  if (!localTask)
-    return (
-      <Sheet open={!!task} onOpenChange={() => onClose()}>
-        <SheetContent className="w-full sm:max-w-xl p-0">
-          <div />
-        </SheetContent>
-      </Sheet>
-    )
+  if (!localTask) return null
 
   const handleUpdate = (updates: Partial<Task>) => {
     const updated = { ...localTask, ...updates }
@@ -75,258 +53,142 @@ export default function TaskDetailSheet({
     handleUpdate({ subtasks: [...(localTask.subtasks || []), newSt] })
   }
 
-  const toggleSubtask = (id: string) => {
-    handleUpdate({
-      subtasks: localTask.subtasks?.map((st) =>
-        st.id === id ? { ...st, isCompleted: !st.isCompleted } : st,
-      ),
-    })
-  }
-
-  const updateSubtaskTitle = (id: string, title: string) => {
-    handleUpdate({
-      subtasks: localTask.subtasks?.map((st) =>
-        st.id === id ? { ...st, title } : st,
-      ),
-    })
-  }
-
-  const removeSubtask = (id: string) => {
-    handleUpdate({
-      subtasks: localTask.subtasks?.filter((st) => st.id !== id),
-    })
-  }
+  const project = projects.find((p) => p.id === localTask.projectId)
+  const projectName = project ? project.name : 'Sem Projeto'
 
   return (
     <Sheet open={!!task} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="w-full sm:max-w-xl p-0 flex flex-col gap-0 border-l">
-        <SheetHeader className="px-6 py-4 border-b flex flex-row items-center justify-between gap-4">
-          <SheetTitle className="sr-only">Task Details</SheetTitle>
-          <Input
-            value={localTask.title}
-            onChange={(e) => handleUpdate({ title: e.target.value })}
-            className="text-xl font-bold border-transparent px-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none -ml-2 flex-1"
-          />
-          {localTask.funnelId && localTask.nodeId && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                onClose()
-                navigate(
-                  `/canvas/${localTask.funnelId}?nodeId=${localTask.nodeId}`,
-                )
-              }}
-              className="text-purple-600 border-purple-200 bg-purple-50 hover:bg-purple-100 shrink-0 mr-6"
-            >
-              <Network size={14} className="mr-1.5" /> Ver no Canvas
-            </Button>
-          )}
-        </SheetHeader>
-
-        <div className="flex-1 overflow-y-auto p-6 space-y-8 no-scrollbar">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground flex items-center gap-2">
-                <User size={14} /> Assignee
-              </label>
-              <div className="flex items-center gap-2 mt-1">
-                <Avatar className="w-6 h-6">
-                  <AvatarImage src={localTask.avatar} />
-                  <AvatarFallback>
-                    {localTask.assignee?.[0] || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <Input
-                  value={localTask.assignee || ''}
-                  onChange={(e) => handleUpdate({ assignee: e.target.value })}
-                  placeholder="Assign someone"
-                  className="h-8 border-transparent px-1 focus-visible:ring-1"
-                />
-              </div>
+      <SheetContent
+        overlayClassName="bg-[#3D2B1F]/40 backdrop-blur-[4px]"
+        className="w-full sm:max-w-2xl p-0 flex flex-col font-inter border-l border-[#E8E2D9] bg-[#FAF7F2] gap-0 shadow-2xl"
+      >
+        {/* Header */}
+        <div className="bg-white px-6 py-5 flex flex-col border-b border-[#E8E2D9] z-10">
+          <div className="flex justify-between items-center mb-4 pr-6">
+            <div className="flex items-center gap-2 text-[#8C7B6C] text-xs font-semibold">
+              <span className="uppercase tracking-widest text-[10px]">
+                Projeto:
+              </span>
+              <span>{projectName}</span>
             </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground flex items-center gap-2">
-                <CalendarIcon size={14} /> Deadline
-              </label>
-              <Input
-                type="date"
-                value={
-                  localTask.deadline
-                    ? format(new Date(localTask.deadline), 'yyyy-MM-dd')
-                    : ''
-                }
-                onChange={(e) =>
-                  handleUpdate({
-                    deadline: new Date(e.target.value).toISOString(),
-                  })
-                }
-                className="h-8 border-transparent px-1 focus-visible:ring-1"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground">
-                Status
-              </label>
-              <Select
-                value={localTask.status}
-                onValueChange={(val: any) => handleUpdate({ status: val })}
-              >
-                <SelectTrigger className="h-8">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="A Fazer">To Do</SelectItem>
-                  <SelectItem value="Em Progresso">In Progress</SelectItem>
-                  <SelectItem value="Em Revisão">In Review</SelectItem>
-                  <SelectItem value="Concluído">Done</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground">
-                Priority
-              </label>
-              <Select
-                value={localTask.priority}
-                onValueChange={(val: any) => handleUpdate({ priority: val })}
-              >
-                <SelectTrigger className="h-8">
-                  <SelectValue placeholder="Priority" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Baixa">Low</SelectItem>
-                  <SelectItem value="Média">Medium</SelectItem>
-                  <SelectItem value="Alta">High</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1 col-span-2 mt-2">
-              <label className="text-xs font-medium text-muted-foreground flex items-center gap-2">
-                <Folder size={14} /> Project
-              </label>
-              <Select
-                value={localTask.projectId || 'none'}
-                onValueChange={(val: any) =>
-                  handleUpdate({ projectId: val === 'none' ? null : val })
-                }
-              >
-                <SelectTrigger className="h-8">
-                  <SelectValue placeholder="Assign to Project" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None (Draft)</SelectItem>
-                  {projects.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="flex items-center gap-1">
+              {localTask.funnelId && localTask.nodeId && (
+                <button
+                  onClick={() => {
+                    onClose()
+                    navigate(
+                      `/canvas/${localTask.funnelId}?nodeId=${localTask.nodeId}`,
+                    )
+                  }}
+                  className="h-8 px-3 mr-2 rounded-full bg-[#F3EEE7] text-[#C2714F] text-xs font-bold hover:bg-[#C2714F] hover:text-white transition-colors flex items-center gap-1.5 shadow-sm hover:scale-105 transform"
+                >
+                  <Network size={14} /> Canvas
+                </button>
+              )}
+              <button className="w-8 h-8 flex items-center justify-center rounded-full text-[#8C7B6C] hover:bg-[#F3EEE7] hover:text-[#3D2B1F] transition-colors">
+                <Share2 size={16} />
+              </button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-full text-[#8C7B6C] hover:bg-[#F3EEE7] hover:text-[#3D2B1F] transition-colors">
+                <MoreHorizontal size={16} />
+              </button>
             </div>
           </div>
-
-          <div className="space-y-3">
-            <h4 className="text-sm font-semibold flex items-center gap-2">
-              <AlignLeft size={16} /> Description
-            </h4>
-            <Textarea
-              value={localTask.description || ''}
-              onChange={(e) => handleUpdate({ description: e.target.value })}
-              placeholder="Add a more detailed description..."
-              className="min-h-[100px] resize-none"
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() =>
+                handleUpdate({
+                  status:
+                    localTask.status === 'Concluído' ? 'A Fazer' : 'Concluído',
+                })
+              }
+              className={cn(
+                'w-7 h-7 rounded-full border flex items-center justify-center transition-colors shrink-0',
+                localTask.status === 'Concluído'
+                  ? 'bg-[#4CAF50] border-[#4CAF50] text-white'
+                  : 'border-[#E8E2D9] text-transparent hover:border-[#C2714F] hover:text-[#C2714F]/50',
+              )}
+            >
+              <Check size={16} strokeWidth={3} />
+            </button>
+            <input
+              value={localTask.title}
+              onChange={(e) => handleUpdate({ title: e.target.value })}
+              className="text-2xl font-bold text-[#3D2B1F] bg-transparent outline-none flex-1 placeholder:text-[#E8E2D9]"
+              placeholder="Título da tarefa"
             />
           </div>
+        </div>
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-semibold flex items-center gap-2">
-                <CheckSquare size={16} /> Subtasks
-              </h4>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={addSubtask}
-                className="h-8 text-muted-foreground"
-              >
-                <Plus size={14} className="mr-1" /> Add
-              </Button>
-            </div>
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto task-scrollbar p-6 pb-32">
+          <TaskMetadata task={localTask} onUpdate={handleUpdate} />
 
-            <div className="space-y-2">
-              {localTask.subtasks?.map((st) => (
-                <div key={st.id} className="flex items-start gap-3 group">
-                  <Checkbox
-                    checked={st.isCompleted}
-                    onCheckedChange={() => toggleSubtask(st.id)}
-                    className="mt-1.5"
-                  />
-                  <Input
-                    value={st.title}
-                    onChange={(e) => updateSubtaskTitle(st.id, e.target.value)}
-                    placeholder="Subtask title"
-                    className={`h-8 border-transparent focus-visible:ring-1 ${st.isCompleted ? 'line-through text-muted-foreground' : ''}`}
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 opacity-0 group-hover:opacity-100 shrink-0 text-destructive"
-                    onClick={() => removeSubtask(st.id)}
-                  >
-                    <Trash2 size={14} />
-                  </Button>
-                </div>
-              ))}
-              {(!localTask.subtasks || localTask.subtasks.length === 0) && (
-                <div className="text-sm text-muted-foreground italic">
-                  No subtasks added yet.
-                </div>
-              )}
+          {/* Description */}
+          <div className="mb-10">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-[#8C7B6C] mb-3 block">
+              Descrição
+            </label>
+            <div className="bg-white rounded-2xl p-5 border border-[#E8E2D9] focus-within:border-[#C2714F]/50 focus-within:ring-2 focus-within:ring-[#C2714F]/10 transition-all">
+              <textarea
+                value={localTask.description || ''}
+                onChange={(e) => handleUpdate({ description: e.target.value })}
+                placeholder="Adicione mais detalhes a esta tarefa..."
+                className="w-full bg-transparent outline-none text-[#3D2B1F] text-sm resize-none min-h-[120px] placeholder:text-[#8C7B6C]/50"
+              />
             </div>
           </div>
 
-          <div className="space-y-4 pt-4 border-t">
-            <h4 className="text-sm font-semibold flex items-center gap-2">
-              <MessageSquare size={16} /> Activity
-            </h4>
-            <div className="space-y-4">
-              {localTask.comments?.map((c) => (
-                <div key={c.id} className="flex gap-3">
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={c.avatar} />
-                    <AvatarFallback>{c.author[0]}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm">{c.author}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {format(new Date(c.createdAt), 'MMM dd, HH:mm')}
-                      </span>
-                    </div>
-                    <div className="text-sm bg-muted/50 p-3 rounded-xl rounded-tl-none">
-                      {c.content}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="flex gap-3 pt-2">
-              <Avatar className="w-8 h-8">
-                <AvatarFallback>Me</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 relative">
-                <Textarea
-                  placeholder="Write a comment..."
-                  className="min-h-[80px] resize-none pb-12"
-                />
-                <Button size="sm" className="absolute bottom-2 right-2 h-8">
-                  Save
-                </Button>
+          <TaskSubtasks
+            task={localTask}
+            onAdd={addSubtask}
+            onToggle={(id) =>
+              handleUpdate({
+                subtasks: localTask.subtasks?.map((st) =>
+                  st.id === id ? { ...st, isCompleted: !st.isCompleted } : st,
+                ),
+              })
+            }
+            onUpdateTitle={(id, title) =>
+              handleUpdate({
+                subtasks: localTask.subtasks?.map((st) =>
+                  st.id === id ? { ...st, title } : st,
+                ),
+              })
+            }
+            onRemove={(id) =>
+              handleUpdate({
+                subtasks: localTask.subtasks?.filter((st) => st.id !== id),
+              })
+            }
+          />
+
+          <TaskActivity task={localTask} />
+        </div>
+
+        {/* Footer */}
+        <div className="absolute bottom-0 left-0 right-0 bg-[#FAF7F2] border-t border-[#E8E2D9] p-4 flex items-end gap-3 z-20">
+          <Avatar className="w-9 h-9 shrink-0">
+            <AvatarFallback className="bg-[#C2714F] text-white text-xs font-bold">
+              ME
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 bg-white rounded-2xl border border-[#E8E2D9] flex flex-col p-2 focus-within:border-[#C2714F]/50 focus-within:ring-2 focus-within:ring-[#C2714F]/10 transition-all">
+            <textarea
+              placeholder="Escreva um comentário..."
+              className="w-full bg-transparent outline-none text-sm text-[#3D2B1F] placeholder:text-[#8C7B6C] resize-none h-[40px] px-2 py-1"
+            />
+            <div className="flex items-center justify-between px-2 pt-1">
+              <div className="flex items-center gap-1 text-[#8C7B6C]">
+                <button className="p-1.5 hover:text-[#C2714F] hover:bg-[#F3EEE7] rounded-md transition-colors">
+                  <AtSign size={14} />
+                </button>
+                <button className="p-1.5 hover:text-[#C2714F] hover:bg-[#F3EEE7] rounded-md transition-colors">
+                  <Paperclip size={14} />
+                </button>
               </div>
+              <button className="w-8 h-8 rounded-full bg-[#C2714F] text-white flex items-center justify-center hover:bg-[#a65d3f] transition-all shadow-sm hover:scale-105 transform shrink-0">
+                <Send size={14} className="ml-0.5" />
+              </button>
             </div>
           </div>
         </div>

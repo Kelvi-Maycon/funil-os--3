@@ -27,6 +27,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['DM Sans', 'system-ui', 'sans-serif'],
+        inter: ['Inter', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         xs: ['11px', { lineHeight: '14px', fontWeight: '600' }],
