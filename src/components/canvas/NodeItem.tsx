@@ -23,6 +23,7 @@ import {
   CheckSquare,
   Plus,
   X,
+  PlayCircle,
 } from 'lucide-react'
 import {
   Tooltip,
@@ -45,7 +46,12 @@ const icons: Record<string, any> = {
   ManyChat: MessageCircle,
   WaitUntil: Clock,
   Default: Zap,
+  VSL: PlayCircle,
+  Traffic: Megaphone,
+  Goal: CheckCircle,
 }
+
+type Metric = { label: string; value: string }
 
 type NodeItemProps = {
   node: Node
@@ -110,7 +116,6 @@ export default function NodeItem({
     onResizeEnd,
   })
 
-  // Synchronously update callbacks ref on each render to avoid stale closures in event listeners
   callbacksRef.current = {
     onPointerDownAction,
     onMove,
@@ -297,9 +302,7 @@ export default function NodeItem({
     const handlePointerUp = (upEv: PointerEvent) => {
       try {
         target.releasePointerCapture(upEv.pointerId)
-      } catch (err) {
-        /* ignore */
-      }
+      } catch (err) {}
       setIsResizing(false)
       document.body.style.userSelect = ''
 
@@ -356,38 +359,14 @@ export default function NodeItem({
     }
   }
 
-  const getBackgroundColor = () => {
-    if (node.data.isTaskMode && node.data.isCompleted) return undefined
-    const fill = node.style?.fill
-    const opacity = node.style?.opacity ?? 1
-    if (!fill || fill === 'transparent') {
-      if (opacity < 1) return `rgba(255, 255, 255, ${opacity})`
-      return undefined
-    }
-    if (fill.startsWith('#')) {
-      let r, g, b
-      if (fill.length === 4) {
-        r = parseInt(fill[1] + fill[1], 16)
-        g = parseInt(fill[2] + fill[2], 16)
-        b = parseInt(fill[3] + fill[3], 16)
-      } else {
-        r = parseInt(fill.slice(1, 3), 16)
-        g = parseInt(fill.slice(3, 5), 16)
-        b = parseInt(fill.slice(5, 7), 16)
-      }
-      return `rgba(${r}, ${g}, ${b}, ${opacity})`
-    }
-    return fill
-  }
-
   if (node.type === 'FloatingText') {
     return (
       <div
         className={cn(
           'absolute top-0 left-0 pointer-events-auto min-w-[50px] p-2 z-10 group outline-none',
-          selected && 'ring-2 ring-purple-500/60 shadow-lg rounded-md',
+          selected && 'ring-2 ring-[#C2714F]/60 shadow-lg rounded-md',
           isDragging
-            ? 'opacity-95 scale-[1.02] z-50 cursor-grabbing shadow-xl ring-2 ring-purple-500/30 rounded-md'
+            ? 'opacity-95 scale-[1.02] z-50 cursor-grabbing shadow-xl ring-2 ring-[#C2714F]/30 rounded-md'
             : isPanMode
               ? 'cursor-grab'
               : isSelectMode
@@ -398,7 +377,7 @@ export default function NodeItem({
         )}
         style={{
           transform: `translate3d(${node.x}px, ${node.y}px, 0)`,
-          color: node.style?.color || '#1e293b',
+          color: node.style?.color || '#3D2B1F',
           transition: isDragging
             ? 'none'
             : 'transform 0.15s cubic-bezier(0.2, 0, 0, 1)',
@@ -430,7 +409,7 @@ export default function NodeItem({
       >
         <div
           ref={textRef}
-          className="font-medium text-[15px] whitespace-pre-wrap outline-none min-h-[24px] min-w-[20px]"
+          className="font-bold text-[15px] whitespace-pre-wrap outline-none min-h-[24px] min-w-[20px]"
           contentEditable={isEditingText}
           suppressContentEditableWarning
           onPointerDown={(e) => {
@@ -444,42 +423,6 @@ export default function NodeItem({
         >
           {node.data.name}
         </div>
-
-        {!isPanMode && isSelectMode && (
-          <div
-            className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center cursor-crosshair z-20 group/port interactive-icon opacity-0 group-hover:opacity-100 transition-opacity"
-            onPointerDown={(e) => {
-              e.stopPropagation()
-              onEdgeDragStart(node.id, e)
-            }}
-          >
-            <div className="w-3 h-3 rounded-full bg-white border-2 border-slate-200 group-hover/port:border-purple-500 group-hover/port:scale-125 transition-all shadow-sm" />
-          </div>
-        )}
-
-        <div
-          className={cn(
-            'absolute -top-3 -right-3 flex items-center gap-1.5 z-20 transition-opacity',
-            selected || isHovered
-              ? 'opacity-100'
-              : 'opacity-0 pointer-events-none',
-          )}
-        >
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onDelete()
-                }}
-                className="interactive-icon w-7 h-7 bg-white border border-slate-100 rounded-full flex items-center justify-center text-red-400 hover:text-red-600 shadow-sm transition-transform hover:scale-110"
-              >
-                <Trash2 size={13} strokeWidth={2.5} />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>Excluir</TooltipContent>
-          </Tooltip>
-        </div>
       </div>
     )
   }
@@ -491,7 +434,7 @@ export default function NodeItem({
     return (
       <div
         className={cn(
-          'absolute top-0 left-0 pointer-events-auto flex items-center justify-center z-10 group text-slate-700',
+          'absolute top-0 left-0 pointer-events-auto flex items-center justify-center z-10 group text-[#3D2B1F]',
           selected && 'shadow-md',
           isDragging || isResizing
             ? 'opacity-95 z-50 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] cursor-grabbing scale-[1.02]'
@@ -528,7 +471,7 @@ export default function NodeItem({
               rx={8}
               fill={node.style?.fill || 'transparent'}
               fillOpacity={node.style?.opacity ?? 1}
-              stroke={node.style?.stroke || '#1e293b'}
+              stroke={node.style?.stroke || '#3D2B1F'}
               strokeWidth={node.style?.strokeWidth ?? 2}
               strokeDasharray={
                 node.style?.strokeDasharray === 'none'
@@ -537,7 +480,7 @@ export default function NodeItem({
               }
               className={cn(
                 'pointer-events-auto',
-                selected && 'stroke-purple-400 drop-shadow-md',
+                selected && 'stroke-[#C2714F] drop-shadow-md',
               )}
               style={{ transition: isResizing ? 'none' : 'all 0.15s' }}
             />
@@ -550,7 +493,7 @@ export default function NodeItem({
               ry={h / 2}
               fill={node.style?.fill || 'transparent'}
               fillOpacity={node.style?.opacity ?? 1}
-              stroke={node.style?.stroke || '#1e293b'}
+              stroke={node.style?.stroke || '#3D2B1F'}
               strokeWidth={node.style?.strokeWidth ?? 2}
               strokeDasharray={
                 node.style?.strokeDasharray === 'none'
@@ -559,7 +502,7 @@ export default function NodeItem({
               }
               className={cn(
                 'pointer-events-auto',
-                selected && 'stroke-purple-400 drop-shadow-md',
+                selected && 'stroke-[#C2714F] drop-shadow-md',
               )}
               style={{ transition: isResizing ? 'none' : 'all 0.15s' }}
             />
@@ -569,7 +512,7 @@ export default function NodeItem({
               points={`${w / 2},0 ${w},${h / 2} ${w / 2},${h} 0,${h / 2}`}
               fill={node.style?.fill || 'transparent'}
               fillOpacity={node.style?.opacity ?? 1}
-              stroke={node.style?.stroke || '#1e293b'}
+              stroke={node.style?.stroke || '#3D2B1F'}
               strokeWidth={node.style?.strokeWidth ?? 2}
               strokeDasharray={
                 node.style?.strokeDasharray === 'none'
@@ -579,85 +522,40 @@ export default function NodeItem({
               strokeLinejoin="round"
               className={cn(
                 'pointer-events-auto',
-                selected && 'stroke-purple-400 drop-shadow-md',
+                selected && 'stroke-[#C2714F] drop-shadow-md',
               )}
               style={{ transition: isResizing ? 'none' : 'all 0.15s' }}
             />
           )}
         </svg>
 
-        <div
-          className={cn(
-            'absolute -top-6 -right-6 flex items-center gap-1.5 z-20 transition-opacity',
-            selected || isHovered
-              ? 'opacity-100'
-              : 'opacity-0 pointer-events-none',
-          )}
-        >
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onDelete()
-                }}
-                className="interactive-icon w-7 h-7 bg-white border border-slate-100 rounded-full flex items-center justify-center text-red-400 hover:text-red-600 shadow-sm transition-transform hover:scale-110"
-              >
-                <Trash2 size={13} strokeWidth={2.5} />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>Excluir</TooltipContent>
-          </Tooltip>
-        </div>
-
-        {!isPanMode && isSelectMode && (
-          <div
-            className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center cursor-crosshair z-20 group/port interactive-icon opacity-0 group-hover:opacity-100 transition-opacity"
-            onPointerDown={(e) => {
-              e.stopPropagation()
-              onEdgeDragStart(node.id, e)
-            }}
-          >
-            <div className="w-3 h-3 rounded-full bg-white border-2 border-slate-200 group-hover/port:border-purple-500 group-hover/port:scale-125 transition-all shadow-sm" />
-          </div>
-        )}
-
         {selected && !isPanMode && isSelectMode && (
           <>
-            <div className="absolute top-0 left-0 w-full h-full border border-purple-500/50 pointer-events-none" />
-            <div
-              className="resize-handle nw-resize absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border border-purple-500 rounded-sm cursor-nwse-resize z-30"
-              onPointerDown={(e) => handleResizeStart(e, 'nw')}
-            />
-            <div
-              className="resize-handle ne-resize absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border border-purple-500 rounded-sm cursor-nesw-resize z-30"
-              onPointerDown={(e) => handleResizeStart(e, 'ne')}
-            />
-            <div
-              className="resize-handle sw-resize absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border border-purple-500 rounded-sm cursor-nesw-resize z-30"
-              onPointerDown={(e) => handleResizeStart(e, 'sw')}
-            />
-            <div
-              className="resize-handle se-resize absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border border-purple-500 rounded-sm cursor-nwse-resize z-30"
-              onPointerDown={(e) => handleResizeStart(e, 'se')}
-            />
-
-            <div
-              className="resize-handle n-resize absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border border-purple-500 rounded-sm cursor-ns-resize z-30"
-              onPointerDown={(e) => handleResizeStart(e, 'n')}
-            />
-            <div
-              className="resize-handle s-resize absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border border-purple-500 rounded-sm cursor-ns-resize z-30"
-              onPointerDown={(e) => handleResizeStart(e, 's')}
-            />
-            <div
-              className="resize-handle e-resize absolute top-1/2 -right-1.5 -translate-y-1/2 w-3 h-3 bg-white border border-purple-500 rounded-sm cursor-ew-resize z-30"
-              onPointerDown={(e) => handleResizeStart(e, 'e')}
-            />
-            <div
-              className="resize-handle w-resize absolute top-1/2 -left-1.5 -translate-y-1/2 w-3 h-3 bg-white border border-purple-500 rounded-sm cursor-ew-resize z-30"
-              onPointerDown={(e) => handleResizeStart(e, 'w')}
-            />
+            <div className="absolute top-0 left-0 w-full h-full border border-[#C2714F]/50 pointer-events-none" />
+            {['nw', 'ne', 'sw', 'se', 'n', 's', 'e', 'w'].map((corner) => (
+              <div
+                key={corner}
+                className={`resize-handle ${corner}-resize absolute w-3 h-3 bg-white border border-[#C2714F] rounded-sm z-30`}
+                style={{
+                  top: corner.includes('n')
+                    ? '-6px'
+                    : corner.includes('s')
+                      ? 'auto'
+                      : '50%',
+                  bottom: corner.includes('s') ? '-6px' : 'auto',
+                  left: corner.includes('w')
+                    ? '-6px'
+                    : corner.includes('e')
+                      ? 'auto'
+                      : '50%',
+                  right: corner.includes('e') ? '-6px' : 'auto',
+                  transform:
+                    corner.length === 1 ? 'translate(-50%, -50%)' : 'none',
+                  cursor: `${corner}-resize`,
+                }}
+                onPointerDown={(e) => handleResizeStart(e, corner)}
+              />
+            ))}
           </>
         )}
       </div>
@@ -668,10 +566,10 @@ export default function NodeItem({
     return (
       <div
         className={cn(
-          'absolute top-0 left-0 pointer-events-auto min-w-[150px] max-w-[400px] p-4 bg-yellow-50/90 backdrop-blur-sm rounded-xl shadow-sm border border-yellow-200 text-slate-800 z-10 group',
-          selected && 'ring-2 ring-purple-500/60 shadow-md',
+          'absolute top-0 left-0 pointer-events-auto min-w-[150px] max-w-[400px] p-4 bg-[#FAF7F2] rounded-xl shadow-sm border border-[#E8E2D9] text-[#3D2B1F] z-10 group',
+          selected && 'ring-2 ring-[#C2714F]/60 shadow-md',
           isDragging
-            ? 'opacity-95 scale-[1.02] z-50 cursor-grabbing shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] ring-2 ring-purple-500/50'
+            ? 'opacity-95 scale-[1.02] z-50 cursor-grabbing shadow-xl ring-2 ring-[#C2714F]/50'
             : isPanMode
               ? 'cursor-grab'
               : isSelectMode
@@ -697,18 +595,13 @@ export default function NodeItem({
           if (!isPanMode && isSelectMode) {
             e.stopPropagation()
             setIsEditingText(true)
-            setTimeout(() => {
-              textRef.current?.focus()
-            }, 0)
+            setTimeout(() => textRef.current?.focus(), 0)
           }
         }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        data-node-id={node.id}
       >
         <div
           ref={textRef}
-          className="font-medium text-[15px] whitespace-pre-wrap outline-none cursor-text"
+          className="font-bold text-[15px] whitespace-pre-wrap outline-none cursor-text"
           contentEditable={isEditingText}
           suppressContentEditableWarning
           onPointerDown={(e) => {
@@ -721,18 +614,6 @@ export default function NodeItem({
         >
           {node.data.name}
         </div>
-
-        {!isPanMode && isSelectMode && (
-          <div
-            className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center cursor-crosshair z-20 group/port interactive-icon opacity-0 group-hover:opacity-100 transition-opacity"
-            onPointerDown={(e) => {
-              e.stopPropagation()
-              onEdgeDragStart(node.id, e)
-            }}
-          >
-            <div className="w-3 h-3 rounded-full bg-white border-2 border-slate-200 group-hover/port:border-purple-500 group-hover/port:scale-125 transition-all shadow-sm" />
-          </div>
-        )}
       </div>
     )
   }
@@ -741,11 +622,10 @@ export default function NodeItem({
     return (
       <div
         className={cn(
-          'absolute top-0 left-0 pointer-events-auto w-[300px] rounded-2xl shadow-sm border border-slate-200 bg-white z-10 overflow-hidden group',
-          selected &&
-            'ring-4 ring-purple-500/40 border-purple-500/50 shadow-md',
+          'absolute top-0 left-0 pointer-events-auto w-[300px] rounded-2xl shadow-sm border border-[#E8E2D9] bg-white z-10 overflow-hidden group',
+          selected && 'ring-4 ring-[#C2714F]/40 border-[#C2714F] shadow-md',
           isDragging
-            ? 'opacity-95 scale-[1.02] z-50 cursor-grabbing shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] ring-4 ring-purple-500/50'
+            ? 'opacity-95 scale-[1.02] z-50 cursor-grabbing shadow-xl ring-4 ring-[#C2714F]/50'
             : isPanMode
               ? 'cursor-grab'
               : isSelectMode
@@ -765,30 +645,19 @@ export default function NodeItem({
             onOpenRightPanel('assets')
           }
         }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        data-node-id={node.id}
       >
         <img
           src={node.data.name}
           alt="Canvas"
           className="w-full h-auto object-cover pointer-events-none select-none"
         />
-
-        {!isPanMode && isSelectMode && (
-          <div
-            className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center cursor-crosshair z-20 group/port interactive-icon opacity-0 group-hover:opacity-100 transition-opacity"
-            onPointerDown={(e) => {
-              e.stopPropagation()
-              onEdgeDragStart(node.id, e)
-            }}
-          >
-            <div className="w-3 h-3 rounded-full bg-white border-2 border-slate-200 group-hover/port:border-purple-500 group-hover/port:scale-125 transition-all shadow-sm" />
-          </div>
-        )}
       </div>
     )
   }
+
+  const isTraffic = ['Ad', 'Traffic', 'Goal', 'Email'].includes(node.type)
+  const isFeatured = ['VSL', 'Webinar'].includes(node.type)
+  const isStandard = !isTraffic && !isFeatured
 
   const Icon = icons[node.type] || icons.Default
   const circumference = 2 * Math.PI * 6
@@ -800,26 +669,16 @@ export default function NodeItem({
   return (
     <div
       className={cn(
-        'absolute top-0 left-0 pointer-events-auto w-[260px] rounded-[1.25rem] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border p-5 z-10 flex flex-col gap-2 group select-none',
-        isHovered &&
-          !selected &&
-          'shadow-[0_8px_30px_rgba(0,0,0,0.06)] ring-4 ring-slate-50',
-        selected &&
-          'shadow-[0_8px_30px_rgba(0,0,0,0.12)] ring-2 ring-purple-500/40 border-purple-500/50',
-        isDragging &&
-          'opacity-95 scale-[1.03] z-50 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] ring-2 ring-purple-500/50 border-purple-500/50',
-        node.data.isTaskMode && node.data.isCompleted
-          ? 'bg-[#ecfdf5] border-[#bbf7d0]'
-          : (node.style?.fill && node.style.fill !== 'transparent') ||
-              (node.style?.opacity ?? 1) < 1
-            ? 'border-slate-100'
-            : 'bg-white border-slate-100',
+        'absolute top-0 left-0 pointer-events-auto w-[280px] rounded-[1.25rem] p-5 z-10 flex flex-col gap-3 group select-none transition-all duration-200',
+        isTraffic && 'bg-[#3D2B1F] border border-[#3D2B1F] shadow-lg',
+        isFeatured && 'bg-white border-2 border-[#C2714F] shadow-2xl',
+        isStandard && 'bg-white border border-[#E8E2D9] shadow-sm',
+        isHovered && !selected && !isFeatured && 'shadow-md',
+        selected && 'ring-4 ring-[#C2714F]/20 border-[#C2714F] shadow-xl',
+        isDragging && 'opacity-95 scale-[1.03] z-50 shadow-2xl',
       )}
       style={{
         transform: `translate3d(${node.x}px, ${node.y}px, 0)`,
-        transition: isDragging
-          ? 'none'
-          : 'transform 0.15s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s, background-color 0.3s',
         cursor: isPanMode
           ? 'grab'
           : isDragging
@@ -827,7 +686,6 @@ export default function NodeItem({
             : isSelectMode
               ? 'pointer'
               : '',
-        backgroundColor: getBackgroundColor(),
       }}
       onPointerDown={handlePointerDown}
       onDoubleClick={(e) => {
@@ -845,41 +703,6 @@ export default function NodeItem({
       onDrop={handleDrop}
       data-node-id={node.id}
     >
-      <div className="absolute -top-3.5 left-4 flex items-center gap-1.5 z-20">
-        {(node.data.linkedDocumentIds?.length ?? 0) > 0 && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div
-                className="interactive-icon w-7 h-7 rounded-full bg-white border border-slate-100 text-blue-500 flex items-center justify-center shadow-sm cursor-pointer hover:scale-110 transition-transform"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onOpenRightPanel('content')
-                }}
-              >
-                <FileText size={13} strokeWidth={2.5} />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>Ver Documentos</TooltipContent>
-          </Tooltip>
-        )}
-        {(node.data.linkedAssetIds?.length ?? 0) > 0 && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div
-                className="interactive-icon w-7 h-7 rounded-full bg-white border border-slate-100 text-purple-500 flex items-center justify-center shadow-sm cursor-pointer hover:scale-110 transition-transform"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onOpenRightPanel('assets')
-                }}
-              >
-                <ImageIcon size={13} strokeWidth={2.5} />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>Ver Assets</TooltipContent>
-          </Tooltip>
-        )}
-      </div>
-
       <div className="absolute -top-3.5 right-4 flex items-center gap-1.5 z-20">
         <div
           className={cn(
@@ -896,7 +719,7 @@ export default function NodeItem({
                   e.stopPropagation()
                   onOpenSettings()
                 }}
-                className="interactive-icon w-7 h-7 bg-white border border-slate-100 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 shadow-sm transition-transform hover:scale-110"
+                className="interactive-icon w-7 h-7 bg-white border border-[#E8E2D9] rounded-full flex items-center justify-center text-[#8C7B6C] hover:text-[#3D2B1F] shadow-sm transition-transform hover:scale-110"
               >
                 <Settings size={13} strokeWidth={2.5} />
               </button>
@@ -910,7 +733,7 @@ export default function NodeItem({
                   e.stopPropagation()
                   onDelete()
                 }}
-                className="interactive-icon w-7 h-7 bg-white border border-slate-100 rounded-full flex items-center justify-center text-red-400 hover:text-red-600 shadow-sm transition-transform hover:scale-110"
+                className="interactive-icon w-7 h-7 bg-white border border-[#E8E2D9] rounded-full flex items-center justify-center text-red-500 hover:text-red-700 shadow-sm transition-transform hover:scale-110"
               >
                 <Trash2 size={13} strokeWidth={2.5} />
               </button>
@@ -918,106 +741,97 @@ export default function NodeItem({
             <TooltipContent>Excluir</TooltipContent>
           </Tooltip>
         </div>
-
-        {showTaskIcon && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div
-                className="interactive-icon w-7 h-7 rounded-full bg-white shadow-sm flex items-center justify-center border border-slate-100 cursor-pointer hover:scale-110 transition-transform"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onOpenRightPanel('tasks')
-                }}
-              >
-                {taskProgress.total > 0 ? (
-                  <svg width="16" height="16" className="transform -rotate-90">
-                    <circle
-                      cx="8"
-                      cy="8"
-                      r="6"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      fill="transparent"
-                      className="text-slate-100"
-                    />
-                    <circle
-                      cx="8"
-                      cy="8"
-                      r="6"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      fill="transparent"
-                      strokeDasharray={circumference}
-                      strokeDashoffset={strokeDashoffset}
-                      className="text-blue-500 transition-all duration-500"
-                    />
-                  </svg>
-                ) : (
-                  <CheckSquare
-                    size={13}
-                    className="text-slate-400"
-                    strokeWidth={2.5}
-                  />
-                )}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>Tarefas</TooltipContent>
-          </Tooltip>
-        )}
       </div>
 
-      <div className="flex items-center gap-2 text-slate-500 mb-0.5 mt-0.5">
-        <Icon size={15} strokeWidth={2} className="text-slate-400" />
-        <span className="text-[13px] font-semibold tracking-wide text-slate-600">
-          {node.type}
-        </span>
-      </div>
-
-      <div className="flex flex-col">
-        <div className="flex items-start gap-2.5">
-          {node.data.isTaskMode && (
-            <div
-              className="mt-0.5"
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation()
-                onToggleComplete()
-              }}
-            >
-              <Checkbox
-                checked={node.data.isCompleted}
-                className={cn(
-                  'rounded-[4px] border-slate-300 w-4 h-4 shadow-none',
-                  node.data.isCompleted &&
-                    'data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500',
-                )}
-              />
-            </div>
-          )}
-          <div className="flex flex-col min-w-0 flex-1">
-            <h4
-              className={cn(
-                'font-bold text-slate-800 text-[15px] truncate leading-tight',
-                node.data.isTaskMode &&
-                  node.data.isCompleted &&
-                  'text-slate-600 line-through decoration-slate-300',
-              )}
-            >
-              {node.data.name}
-            </h4>
-            <span className="text-[13px] text-slate-400 mt-1 truncate font-medium">
-              {node.data.subtitle || '+1 filter'}
-            </span>
+      <div className="flex items-center gap-3">
+        {isTraffic ? (
+          <div className="w-10 h-10 rounded-xl bg-[#C2714F] flex items-center justify-center text-white shrink-0 shadow-sm">
+            <Icon size={20} strokeWidth={2} />
           </div>
+        ) : (
+          <div className="w-10 h-10 rounded-xl bg-[#FAF7F2] flex items-center justify-center text-[#C2714F] shrink-0 border border-[#E8E2D9]">
+            <Icon size={20} strokeWidth={2} />
+          </div>
+        )}
+        <div className="flex flex-col min-w-0 flex-1">
+          <h4
+            className={cn(
+              'font-bold text-[15px] truncate leading-tight',
+              isTraffic ? 'text-white' : 'text-[#3D2B1F]',
+            )}
+          >
+            {node.data.name}
+          </h4>
+          <span
+            className={cn(
+              'text-[12px] mt-0.5 truncate font-medium',
+              isTraffic ? 'text-white/70' : 'text-[#8C7B6C]',
+            )}
+          >
+            {node.data.subtitle || node.type}
+          </span>
         </div>
       </div>
+
+      {node.data.metrics && (node.data.metrics as Metric[]).length > 0 && (
+        <div
+          className={cn(
+            'flex flex-wrap items-center gap-4 mt-2 pt-3 border-t',
+            isTraffic ? 'border-white/10' : 'border-[#E8E2D9]',
+          )}
+        >
+          {(node.data.metrics as Metric[]).map((m: any, i: number) => (
+            <div key={i} className="flex flex-col gap-0.5">
+              <span
+                className={cn(
+                  'text-[10px] font-bold uppercase tracking-wider',
+                  isTraffic ? 'text-white/50' : 'text-[#8C7B6C]',
+                )}
+              >
+                {m.label}
+              </span>
+              <span
+                className={cn(
+                  'text-[13px] font-bold',
+                  isTraffic ? 'text-white' : 'text-[#3D2B1F]',
+                )}
+              >
+                {m.value}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {isFeatured && (
+        <div className="mt-2 flex flex-col gap-1.5 pt-3 border-t border-[#E8E2D9]">
+          <div className="flex justify-between items-center text-[11px] font-bold">
+            <span className="text-[#8C7B6C] uppercase tracking-wider">
+              Retenção
+            </span>
+            <span className="text-[#C2714F]">
+              {node.data.retention || '42%'}
+            </span>
+          </div>
+          <div className="h-2 w-full bg-[#FAF7F2] rounded-full overflow-hidden border border-[#E8E2D9]/50">
+            <div
+              className="h-full bg-gradient-to-r from-[#C2714F] to-[#d68563] rounded-full"
+              style={{ width: node.data.retention || '42%' }}
+            />
+          </div>
+        </div>
+      )}
 
       {node.data.isTaskMode && (
         <div className="mt-2 flex flex-col gap-1.5">
           {linkedTasks.length > 0 && (
-            <div className="h-px bg-slate-100 w-full my-1 rounded-full" />
+            <div
+              className={cn(
+                'h-px w-full my-1 rounded-full',
+                isTraffic ? 'bg-white/10' : 'bg-[#E8E2D9]',
+              )}
+            />
           )}
-
           {linkedTasks.map((task) => (
             <div
               key={task.id}
@@ -1026,30 +840,29 @@ export default function NodeItem({
               <Checkbox
                 checked={task.status === 'Concluído'}
                 onCheckedChange={() => handleToggleTask(task)}
-                className="mt-0.5 w-3.5 h-3.5 rounded-[4px] border-slate-300 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
+                className={cn(
+                  'mt-0.5 w-3.5 h-3.5 rounded-[4px] border',
+                  isTraffic
+                    ? 'border-white/30 data-[state=checked]:bg-white data-[state=checked]:text-[#3D2B1F]'
+                    : 'border-[#E8E2D9] data-[state=checked]:bg-[#C2714F] data-[state=checked]:border-[#C2714F]',
+                )}
               />
               <span
                 className={cn(
-                  'text-[12px] leading-tight font-medium flex-1 transition-all break-words',
+                  'text-[12px] leading-tight font-bold flex-1 transition-all break-words',
                   task.status === 'Concluído'
-                    ? 'text-slate-400 line-through'
-                    : 'text-slate-600 group-hover/task:text-slate-800',
+                    ? isTraffic
+                      ? 'text-white/40 line-through'
+                      : 'text-[#8C7B6C] line-through'
+                    : isTraffic
+                      ? 'text-white'
+                      : 'text-[#3D2B1F]',
                 )}
               >
                 {task.title}
               </span>
-              <button
-                className="absolute right-0 top-0 opacity-0 group-hover/task:opacity-100 text-slate-300 hover:text-red-500 transition-opacity"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleDeleteTask(task.id)
-                }}
-              >
-                <X size={14} />
-              </button>
             </div>
           ))}
-
           {isAddingTask ? (
             <div className="flex items-center gap-1.5 mt-1">
               <input
@@ -1067,15 +880,16 @@ export default function NodeItem({
                     setNewTaskTitle('')
                   }
                 }}
-                onBlur={() => {
-                  if (newTaskTitle.trim()) {
-                    handleAddTask()
-                  } else {
-                    setIsAddingTask(false)
-                  }
-                }}
+                onBlur={() =>
+                  newTaskTitle.trim() ? handleAddTask() : setIsAddingTask(false)
+                }
                 placeholder="Nome da tarefa..."
-                className="flex-1 text-[12px] bg-slate-50 border border-slate-200 rounded px-2 py-1 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400/20 transition-all text-slate-700 w-full"
+                className={cn(
+                  'flex-1 text-[12px] border rounded px-2 py-1 outline-none transition-all w-full font-bold',
+                  isTraffic
+                    ? 'bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-white/50'
+                    : 'bg-[#FAF7F2] border-[#E8E2D9] text-[#3D2B1F] placeholder:text-[#8C7B6C] focus:border-[#C2714F]',
+                )}
               />
             </div>
           ) : (
@@ -1084,10 +898,14 @@ export default function NodeItem({
                 e.stopPropagation()
                 setIsAddingTask(true)
               }}
-              className="flex items-center gap-1.5 mt-1 text-[12px] font-medium text-slate-400 hover:text-blue-500 transition-colors w-full text-left py-0.5 rounded-sm interactive-icon"
+              className={cn(
+                'flex items-center gap-1.5 mt-1 text-[12px] font-bold transition-colors w-full text-left py-0.5 rounded-sm interactive-icon',
+                isTraffic
+                  ? 'text-white/50 hover:text-white'
+                  : 'text-[#8C7B6C] hover:text-[#C2714F]',
+              )}
             >
-              <Plus size={12} strokeWidth={2.5} />
-              Adicionar tarefa
+              <Plus size={12} strokeWidth={2.5} /> Adicionar tarefa
             </button>
           )}
         </div>
@@ -1101,19 +919,19 @@ export default function NodeItem({
             onEdgeDragStart(node.id, e)
           }}
         >
-          <div className="w-3 h-3 rounded-full bg-white border-2 border-slate-200 group-hover/port:border-purple-500 group-hover/port:scale-125 transition-all shadow-sm" />
+          <div className="w-3 h-3 rounded-full bg-white border-2 border-[#E8E2D9] group-hover/port:border-[#C2714F] group-hover/port:bg-[#C2714F] group-hover/port:scale-125 transition-all shadow-sm" />
         </div>
       )}
 
-      <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 z-20">
+      <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
           onClick={(e) => {
             e.stopPropagation()
             onAddChild()
           }}
-          className="interactive-icon h-8 px-4 bg-white border border-slate-100 rounded-full shadow-sm flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800 hover:border-slate-200 transition-all font-medium text-[12px]"
+          className="interactive-icon w-8 h-8 bg-white border border-[#E8E2D9] rounded-full shadow-sm flex items-center justify-center text-[#8C7B6C] hover:text-[#C2714F] hover:border-[#C2714F] transition-all"
         >
-          <ExternalLink size={12} strokeWidth={2} /> Exit
+          <Plus size={14} strokeWidth={2.5} />
         </button>
       </div>
     </div>

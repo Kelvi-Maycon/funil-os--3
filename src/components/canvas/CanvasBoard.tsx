@@ -15,15 +15,12 @@ import {
   Minus,
   Map,
   Grid,
-  Edit2,
   Image as ImageIcon,
   MousePointer2,
   Hand,
   Type,
   ArrowLeft,
-  Square,
-  Diamond,
-  Circle,
+  MessageCircle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -50,7 +47,7 @@ const getRightPortCoords = (node: Node, x: number, y: number) => {
   }
   if (node.type === 'Image') return { x: x + 300, y: y + 100 }
   if (node.type === 'Text') return { x: x + 150, y: y + 30 }
-  return { x: x + 260, y: y + 44 }
+  return { x: x + 280, y: y + 44 }
 }
 
 const getLeftPortCoords = (node: Node, x: number, y: number) => {
@@ -64,7 +61,7 @@ const getLeftPortCoords = (node: Node, x: number, y: number) => {
 }
 
 const getApproxBounds = (n: Node) => {
-  let w = n.width || 260
+  let w = n.width || 280
   let h = n.height || 120
   if (n.type === 'FloatingText') {
     w = 150
@@ -697,7 +694,7 @@ export default function CanvasBoard({
           x: -transform.x / transform.scale + 400,
           y: -transform.y / transform.scale + 200,
           data: { name, status: '', subtitle: '' },
-          style: type === 'Text' ? { color: '#1e293b' } : undefined,
+          style: type === 'Text' ? { color: '#3D2B1F' } : undefined,
         },
       ],
     })
@@ -783,14 +780,28 @@ export default function CanvasBoard({
     }
   }
 
-  const rightOffset = rightPanelState ? 'right-[540px]' : 'right-6'
+  const rightOffset = rightPanelState ? 'right-80' : 'right-6'
   const canvasTools = [
-    { id: 'Select', icon: MousePointer2, label: 'Select (1)', key: '1' },
-    { id: 'Pan', icon: Hand, label: 'Pan (H)', key: 'H' },
+    { id: 'Select', icon: MousePointer2, label: 'Cursor (1)', key: '1' },
+    { id: 'Pan', icon: Hand, label: 'Hand (H)', key: 'H' },
     { id: 'divider' },
-    { id: 'Square', icon: Square, label: 'Square (2)', key: '2' },
-    { id: 'Diamond', icon: Diamond, label: 'Diamond (3)', key: '3' },
-    { id: 'Circle', icon: Circle, label: 'Circle (4)', key: '4' },
+    {
+      id: 'Text',
+      icon: Type,
+      label: 'Text',
+      action: () => handleAddAnnotation('Text', 'Add text here...'),
+    },
+    {
+      id: 'Image',
+      icon: ImageIcon,
+      label: 'Image',
+      action: () =>
+        handleAddAnnotation(
+          'Image',
+          'https://img.usecurling.com/p/400/300?q=marketing',
+        ),
+    },
+    { id: 'Chat', icon: MessageCircle, label: 'Comment' },
   ]
 
   const isMultiSelect = selectedNodes.length > 1
@@ -818,43 +829,65 @@ export default function CanvasBoard({
   }
 
   return (
-    <div className="flex-1 flex relative overflow-hidden bg-[#f8fafc]">
+    <div className="flex-1 flex relative overflow-hidden bg-transparent">
       {!hideHeader && (
-        <div className="absolute top-6 left-[300px] flex items-center gap-3 text-[14px] z-30 bg-white/90 backdrop-blur-md px-5 py-2.5 rounded-full border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
-          <span
-            className="text-slate-500 font-medium cursor-pointer hover:text-slate-800 transition-colors"
-            onClick={() => navigate('/canvas')}
-          >
-            Campaigns
-          </span>
-          <span className="text-slate-300">/</span>
-          <span className="font-semibold text-slate-800">{funnel.name}</span>
-          <button className="text-slate-400 hover:text-purple-600 transition-colors ml-1">
-            <Edit2 size={14} strokeWidth={2} />
-          </button>
-        </div>
+        <header className="absolute top-0 left-0 right-0 h-20 bg-white border-b border-[#E8E2D9] px-6 flex items-center justify-between z-40">
+          <div className="flex items-center gap-4">
+            {onBack && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-[#8C7B6C] hover:text-[#3D2B1F]"
+                onClick={onBack}
+              >
+                <ArrowLeft size={18} />
+              </Button>
+            )}
+            <h1 className="font-bold text-lg text-[#3D2B1F]">{funnel.name}</h1>
+            <span className="bg-[#FAF7F2] text-[#C2714F] px-2.5 py-1 rounded-md text-xs font-bold border border-[#E8E2D9]">
+              Publicado
+            </span>
+          </div>
+
+          <div className="flex bg-[#FAF7F2] p-1 rounded-lg border border-[#E8E2D9]">
+            <button className="px-4 py-1.5 rounded-md bg-white text-[#C2714F] text-sm font-bold shadow-sm">
+              Editar
+            </button>
+            <button className="px-4 py-1.5 rounded-md text-[#8C7B6C] text-sm font-bold hover:text-[#3D2B1F] transition-colors">
+              Analytics
+            </button>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="flex -space-x-2">
+              <img
+                src="https://img.usecurling.com/ppl/thumbnail?gender=female&seed=1"
+                className="w-8 h-8 rounded-full border-2 border-white shadow-sm"
+                alt="Team 1"
+              />
+              <img
+                src="https://img.usecurling.com/ppl/thumbnail?gender=male&seed=2"
+                className="w-8 h-8 rounded-full border-2 border-white shadow-sm"
+                alt="Team 2"
+              />
+            </div>
+            <Button className="bg-[#3D2B1F] hover:bg-[#3D2B1F]/90 text-white rounded-full font-bold shadow-md">
+              Exportar
+            </Button>
+          </div>
+        </header>
       )}
 
-      {onBack && !hideHeader && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="absolute top-6 left-6 z-30 bg-white/90 backdrop-blur-md shadow-sm border border-slate-100 rounded-full px-4 hover:bg-white text-slate-600 hover:text-slate-900"
-          onClick={onBack}
-        >
-          <ArrowLeft size={16} className="mr-2" /> Voltar
-        </Button>
-      )}
-
+      {/* Left Toolbar */}
       <div
         className={cn(
-          'absolute left-1/2 -translate-x-1/2 flex items-center p-1.5 bg-white/90 backdrop-blur-md rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-slate-200 z-30 gap-1',
-          hideHeader ? 'top-4' : 'top-6',
+          'absolute left-6 flex flex-col items-center p-1.5 bg-white rounded-2xl shadow-sm border border-[#E8E2D9] z-30 gap-1.5',
+          hideHeader ? 'top-6' : 'top-28',
         )}
       >
         {canvasTools.map((t) => {
           if (t.id === 'divider')
-            return <div key={t.id} className="w-px h-6 bg-slate-200 mx-1" />
+            return <div key={t.id} className="w-6 h-px bg-[#E8E2D9] my-1" />
           return (
             <Tooltip key={t.id}>
               <TooltipTrigger asChild>
@@ -862,14 +895,19 @@ export default function CanvasBoard({
                   variant="ghost"
                   size="icon"
                   className={cn(
-                    'w-10 h-10 rounded-full transition-all relative',
-                    activeTool === t.id
-                      ? 'bg-primary/10 text-primary shadow-sm'
-                      : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100',
+                    'w-10 h-10 rounded-xl transition-all relative',
+                    activeTool === t.id &&
+                      t.id !== 'Text' &&
+                      t.id !== 'Image' &&
+                      t.id !== 'Chat'
+                      ? 'bg-[#C2714F]/10 text-[#C2714F] shadow-sm'
+                      : 'text-[#8C7B6C] hover:text-[#3D2B1F] hover:bg-[#FAF7F2]',
                   )}
-                  onClick={() => setActiveTool(t.id as any)}
+                  onClick={() =>
+                    t.action ? t.action() : setActiveTool(t.id as any)
+                  }
                 >
-                  <t.icon size={18} />
+                  <t.icon size={20} strokeWidth={2} />
                   {t.key && t.id !== 'Pan' && (
                     <span className="absolute bottom-1 right-1.5 text-[9px] font-bold opacity-60">
                       {t.key}
@@ -877,115 +915,81 @@ export default function CanvasBoard({
                   )}
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>{t.label}</TooltipContent>
+              <TooltipContent side="right">{t.label}</TooltipContent>
             </Tooltip>
           )
         })}
-        <div className="w-px h-6 bg-slate-200 mx-1" />
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-10 h-10 rounded-full text-slate-500 hover:text-slate-700"
-              onClick={() => handleAddAnnotation('Text', 'Add text here...')}
-            >
-              <Type size={18} />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Add Note</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-10 h-10 rounded-full text-slate-500 hover:text-slate-700"
-              onClick={() =>
-                handleAddAnnotation(
-                  'Image',
-                  'https://img.usecurling.com/p/400/300?q=marketing',
-                )
-              }
-            >
-              <ImageIcon size={18} />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Add Image</TooltipContent>
-        </Tooltip>
       </div>
 
-      <div
-        className={cn(
-          'absolute flex items-center p-1 bg-white/90 backdrop-blur-md rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-slate-200 z-30 gap-1 transition-all duration-300',
-          rightOffset,
-          hideHeader ? 'top-4' : 'top-6',
-        )}
-      >
-        <Button
-          variant="ghost"
-          size="icon"
-          className="w-8 h-8 rounded-full text-slate-500 hover:text-slate-700 hover:bg-slate-100"
-          onClick={zoomOut}
-        >
-          <Minus size={16} />
-        </Button>
+      {/* Zoom and Minimap */}
+      <div className="absolute left-6 bottom-6 flex flex-col items-center p-1.5 bg-white rounded-2xl shadow-sm border border-[#E8E2D9] z-30 gap-1.5">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-10 h-10 rounded-xl text-[#8C7B6C] hover:text-[#3D2B1F] hover:bg-[#FAF7F2]"
+              onClick={zoomIn}
+            >
+              <Plus size={18} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right">Zoom In</TooltipContent>
+        </Tooltip>
+
         <button
           onClick={resetZoom}
-          className="text-[13px] font-semibold text-slate-600 px-3 min-w-[3.5rem] hover:text-primary transition-colors text-center"
+          className="text-[11px] font-bold text-[#3D2B1F] h-8 min-w-[2.5rem] hover:text-[#C2714F] transition-colors text-center"
         >
           {Math.round(transform.scale * 100)}%
         </button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="w-8 h-8 rounded-full text-slate-500 hover:text-slate-700 hover:bg-slate-100"
-          onClick={zoomIn}
-        >
-          <Plus size={16} />
-        </Button>
-      </div>
 
-      <div
-        className={cn(
-          'absolute bottom-6 flex items-center gap-2 z-30 transition-all duration-300',
-          rightOffset,
-        )}
-      >
         <Tooltip>
           <TooltipTrigger asChild>
-            <button
-              onClick={() => setSnapToGrid(!snapToGrid)}
-              className={cn(
-                'w-10 h-10 flex items-center justify-center bg-white border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.08)] rounded-full text-slate-500 hover:text-slate-700 transition-all',
-                snapToGrid && 'bg-primary/10 text-primary border-primary/20',
-              )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-10 h-10 rounded-xl text-[#8C7B6C] hover:text-[#3D2B1F] hover:bg-[#FAF7F2]"
+              onClick={zoomOut}
             >
-              <Grid size={16} />
-            </button>
+              <Minus size={18} />
+            </Button>
           </TooltipTrigger>
-          <TooltipContent>Snap to Grid</TooltipContent>
+          <TooltipContent side="right">Zoom Out</TooltipContent>
         </Tooltip>
+
+        <div className="w-6 h-px bg-[#E8E2D9] my-1" />
+
         <Tooltip>
           <TooltipTrigger asChild>
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                'w-10 h-10 rounded-xl text-[#8C7B6C] hover:text-[#3D2B1F] hover:bg-[#FAF7F2] transition-colors',
+                showMinimap && 'bg-[#C2714F]/10 text-[#C2714F]',
+              )}
               onClick={() => setShowMinimap(!showMinimap)}
-              className={cn(
-                'w-10 h-10 flex items-center justify-center bg-white border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.08)] rounded-full text-slate-500 hover:text-slate-700 transition-all',
-                showMinimap && 'bg-primary/10 text-primary border-primary/20',
-              )}
             >
-              <Map size={16} />
-            </button>
+              <Map size={18} />
+            </Button>
           </TooltipTrigger>
-          <TooltipContent>Minimap</TooltipContent>
+          <TooltipContent side="right">Minimap</TooltipContent>
         </Tooltip>
+      </div>
+
+      {/* Live Insights Pill */}
+      <div className="absolute left-28 bottom-6 bg-white border border-[#E8E2D9] rounded-full px-5 py-2.5 flex items-center gap-2.5 shadow-sm z-30 cursor-pointer hover:shadow-md transition-shadow">
+        <div className="w-2.5 h-2.5 rounded-full bg-[#10b981] animate-pulse" />
+        <span className="text-[13px] font-bold text-[#3D2B1F]">
+          Live Insights Ativos
+        </span>
       </div>
 
       <div
         className={cn(
-          'absolute left-0 z-20 bottom-0 flex pointer-events-none transition-all',
-          hideHeader ? 'top-0' : onBack ? 'top-[72px]' : 'top-6',
+          'absolute left-[88px] z-20 bottom-6 flex pointer-events-none transition-all',
+          hideHeader ? 'top-6' : 'top-28',
         )}
       >
         <div className="pointer-events-auto flex h-full">
@@ -994,32 +998,27 @@ export default function CanvasBoard({
       </div>
 
       {showMinimap && (
-        <div
-          className={cn(
-            'absolute bottom-20 transition-all duration-300 w-48 h-32 bg-white/90 backdrop-blur-md border border-slate-200 shadow-[0_8px_30px_rgba(0,0,0,0.08)] rounded-2xl overflow-hidden z-30',
-            rightOffset,
-          )}
-        >
+        <div className="absolute left-28 bottom-20 transition-all duration-300 w-56 h-36 bg-white border border-[#E8E2D9] shadow-lg rounded-2xl overflow-hidden z-30">
           <div
-            className="w-full h-full relative bg-slate-50/50"
+            className="w-full h-full relative bg-[#FAF7F2]"
             style={{ transform: 'scale(0.08)', transformOrigin: 'top left' }}
           >
             {funnel.nodes.map((n) => (
               <div
                 key={n.id}
-                className="absolute bg-slate-300 rounded-xl"
+                className="absolute bg-[#8C7B6C] rounded-xl opacity-50"
                 style={{
                   left: n.x,
                   top: n.y,
                   width:
                     n.width ||
-                    (n.type === 'Text' || n.type === 'Image' ? 200 : 260),
+                    (n.type === 'Text' || n.type === 'Image' ? 200 : 280),
                   height: n.height || 100,
                 }}
               />
             ))}
             <div
-              className="absolute border-4 border-primary bg-primary/10 rounded-xl"
+              className="absolute border-[6px] border-[#C2714F] bg-[#C2714F]/10 rounded-xl"
               style={{
                 left: -transform.x / transform.scale,
                 top: -transform.y / transform.scale,
@@ -1036,23 +1035,23 @@ export default function CanvasBoard({
       {(selectedNodeObj || selectedEdgeObj) && (
         <div
           className={cn(
-            'absolute top-6 bg-white/95 backdrop-blur-md rounded-3xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] border border-slate-100 p-5 w-[280px] flex flex-col gap-6 z-40 transition-all max-h-[85vh] overflow-y-auto',
-            rightPanelState ? 'right-[540px]' : 'right-6',
+            'absolute top-24 bg-white rounded-3xl shadow-xl border border-[#E8E2D9] p-5 w-[280px] flex flex-col gap-6 z-40 transition-all max-h-[80vh] overflow-y-auto',
+            rightPanelState ? 'right-80' : 'right-6',
           )}
         >
           <div className="flex justify-between items-center">
-            <h4 className="text-[12px] font-bold text-slate-800 tracking-widest uppercase">
+            <h4 className="text-[11px] font-bold text-[#8C7B6C] tracking-widest uppercase">
               {isMultiSelect
-                ? 'MULTIPLE SELECTED'
+                ? 'MÚLTIPLOS SELECIONADOS'
                 : selectedNodeObj
                   ? selectedNodeObj.type === 'FloatingText'
-                    ? 'Text Style'
+                    ? 'ESTILO DE TEXTO'
                     : ['Square', 'Diamond', 'Circle'].includes(
                           selectedNodeObj.type,
                         )
-                      ? 'SHAPE STYLE'
-                      : 'NODE STYLE'
-                  : 'Line Style'}
+                      ? 'ESTILO DE FORMA'
+                      : 'ESTILO DE NÓ'
+                  : 'ESTILO DE LINHA'}
             </h4>
           </div>
 
@@ -1060,57 +1059,22 @@ export default function CanvasBoard({
             ['Square', 'Diamond', 'Circle'].includes(selectedNodeObj.type) && (
               <>
                 <div className="space-y-3">
-                  <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
-                    Background Opacity
-                  </label>
-                  <div className="flex gap-4 items-center">
-                    <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.05"
-                      className="flex-1 accent-primary h-1.5 bg-slate-100 rounded-full appearance-none cursor-pointer"
-                      value={selectedNodeObj.style?.opacity ?? 1}
-                      onChange={(e) =>
-                        updateNodeStyle({ opacity: parseFloat(e.target.value) })
-                      }
-                    />
-                    <span className="text-[13px] font-medium text-slate-600 w-8 text-right">
-                      {Math.round((selectedNodeObj.style?.opacity ?? 1) * 100)}%
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
-                    Fill Color
+                  <label className="text-[11px] font-bold text-[#8C7B6C] uppercase tracking-wider block">
+                    Cor de Preenchimento
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {[
                       'transparent',
-                      '#f8fafc',
-                      '#fce7f3',
-                      '#f3e8ff',
-                      '#e0e7ff',
-                      '#dbeafe',
-                      '#d1fae5',
-                      '#dcfce7',
-                      '#fef9c3',
-                      '#fef08a',
-                      '#ffedd5',
-                      '#fee2e2',
-                      '#1e293b',
-                      '#64748b',
-                      '#ef4444',
-                      '#f97316',
-                      '#f59e0b',
-                      '#84cc16',
+                      '#FAF7F2',
+                      '#3D2B1F',
+                      '#C2714F',
+                      '#E8E2D9',
+                      '#8C7B6C',
                       '#10b981',
-                      '#06b6d4',
+                      '#f59e0b',
+                      '#ef4444',
                       '#3b82f6',
-                      '#6366f1',
                       '#a855f7',
-                      '#ec4899',
                     ].map((c) => (
                       <button
                         key={c}
@@ -1119,240 +1083,14 @@ export default function CanvasBoard({
                           selectedNodeObj.style?.fill === c ||
                             (c === 'transparent' &&
                               !selectedNodeObj.style?.fill)
-                            ? 'border-slate-800 scale-110'
-                            : 'border-slate-200 hover:scale-110',
-                        )}
-                        style={{
-                          backgroundColor: c === 'transparent' ? '#fff' : c,
-                          backgroundImage:
-                            c === 'transparent'
-                              ? 'radial-gradient(#e2e8f0 1px, transparent 0)'
-                              : 'none',
-                          backgroundSize: '4px 4px',
-                        }}
-                        onClick={() => updateNodeStyle({ fill: c })}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
-                    Stroke Color
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      '#1e293b',
-                      '#64748b',
-                      '#ef4444',
-                      '#f97316',
-                      '#f59e0b',
-                      '#84cc16',
-                      '#10b981',
-                      '#06b6d4',
-                      '#3b82f6',
-                      '#6366f1',
-                      '#a855f7',
-                      '#ec4899',
-                    ].map((c) => (
-                      <button
-                        key={c}
-                        className={cn(
-                          'w-7 h-7 rounded-lg border-2 transition-transform',
-                          selectedNodeObj.style?.stroke === c ||
-                            (c === '#1e293b' && !selectedNodeObj.style?.stroke)
-                            ? 'border-slate-800 scale-110'
+                            ? 'border-[#3D2B1F] scale-110'
                             : 'border-transparent hover:scale-110',
                         )}
-                        style={{ backgroundColor: c }}
-                        onClick={() => updateNodeStyle({ stroke: c })}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
-                    Stroke Width
-                  </label>
-                  <div className="flex gap-4 items-center">
-                    <input
-                      type="range"
-                      min="1"
-                      max="8"
-                      step="1"
-                      className="flex-1 accent-primary h-1.5 bg-slate-100 rounded-full appearance-none cursor-pointer"
-                      value={selectedNodeObj.style?.strokeWidth || 2}
-                      onChange={(e) =>
-                        updateNodeStyle({
-                          strokeWidth: parseInt(e.target.value),
-                        })
-                      }
-                    />
-                    <span className="text-[13px] font-medium text-slate-600 w-4 text-center">
-                      {selectedNodeObj.style?.strokeWidth || 2}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
-                    Border Style
-                  </label>
-                  <div className="flex gap-2">
-                    <button
-                      className={cn(
-                        'flex-1 h-9 rounded-lg border-2 flex items-center justify-center transition-colors',
-                        selectedNodeObj.style?.strokeDasharray === 'none' ||
-                          !selectedNodeObj.style?.strokeDasharray
-                          ? 'border-primary bg-primary/10 text-primary'
-                          : 'border-slate-100 bg-white hover:bg-slate-50 text-slate-400',
-                      )}
-                      onClick={() =>
-                        updateNodeStyle({ strokeDasharray: 'none' })
-                      }
-                    >
-                      <svg width="24" height="2" className="overflow-visible">
-                        <line
-                          x1="0"
-                          y1="1"
-                          x2="24"
-                          y2="1"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                        />
-                      </svg>
-                    </button>
-                    <button
-                      className={cn(
-                        'flex-1 h-9 rounded-lg border-2 flex items-center justify-center transition-colors',
-                        selectedNodeObj.style?.strokeDasharray === '8 8'
-                          ? 'border-primary bg-primary/10 text-primary'
-                          : 'border-slate-100 bg-white hover:bg-slate-50 text-slate-400',
-                      )}
-                      onClick={() =>
-                        updateNodeStyle({ strokeDasharray: '8 8' })
-                      }
-                    >
-                      <svg width="24" height="2" className="overflow-visible">
-                        <line
-                          x1="0"
-                          y1="1"
-                          x2="24"
-                          y2="1"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeDasharray="6 6"
-                        />
-                      </svg>
-                    </button>
-                    <button
-                      className={cn(
-                        'flex-1 h-9 rounded-lg border-2 flex items-center justify-center transition-colors',
-                        selectedNodeObj.style?.strokeDasharray === '4 4'
-                          ? 'border-primary bg-primary/10 text-primary'
-                          : 'border-slate-100 bg-white hover:bg-slate-50 text-slate-400',
-                      )}
-                      onClick={() =>
-                        updateNodeStyle({ strokeDasharray: '4 4' })
-                      }
-                    >
-                      <svg width="24" height="2" className="overflow-visible">
-                        <line
-                          x1="0"
-                          y1="1"
-                          x2="24"
-                          y2="1"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeDasharray="2 4"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-
-          {selectedNodeObj &&
-            ![
-              'FloatingText',
-              'Text',
-              'Image',
-              'Square',
-              'Diamond',
-              'Circle',
-            ].includes(selectedNodeObj.type) && (
-              <>
-                <div className="space-y-3">
-                  <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
-                    Background Opacity
-                  </label>
-                  <div className="flex gap-4 items-center">
-                    <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.05"
-                      className="flex-1 accent-primary h-1.5 bg-slate-100 rounded-full appearance-none cursor-pointer"
-                      value={selectedNodeObj.style?.opacity ?? 1}
-                      onChange={(e) =>
-                        updateNodeStyle({ opacity: parseFloat(e.target.value) })
-                      }
-                    />
-                    <span className="text-[13px] font-medium text-slate-600 w-8 text-right">
-                      {Math.round((selectedNodeObj.style?.opacity ?? 1) * 100)}%
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
-                    Background Color
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      'transparent',
-                      '#f8fafc',
-                      '#fce7f3',
-                      '#f3e8ff',
-                      '#e0e7ff',
-                      '#dbeafe',
-                      '#d1fae5',
-                      '#dcfce7',
-                      '#fef9c3',
-                      '#fef08a',
-                      '#ffedd5',
-                      '#fee2e2',
-                      '#1e293b',
-                      '#64748b',
-                      '#ef4444',
-                      '#f97316',
-                      '#f59e0b',
-                      '#84cc16',
-                      '#10b981',
-                      '#06b6d4',
-                      '#3b82f6',
-                      '#6366f1',
-                      '#a855f7',
-                      '#ec4899',
-                    ].map((c) => (
-                      <button
-                        key={c}
-                        className={cn(
-                          'w-7 h-7 rounded-lg border-2 transition-transform',
-                          selectedNodeObj.style?.fill === c ||
-                            (c === 'transparent' &&
-                              !selectedNodeObj.style?.fill)
-                            ? 'border-slate-800 scale-110'
-                            : 'border-slate-200 hover:scale-110',
-                        )}
                         style={{
                           backgroundColor: c === 'transparent' ? '#fff' : c,
                           backgroundImage:
                             c === 'transparent'
-                              ? 'radial-gradient(#e2e8f0 1px, transparent 0)'
+                              ? 'radial-gradient(#E8E2D9 1px, transparent 0)'
                               : 'none',
                           backgroundSize: '4px 4px',
                         }}
@@ -1363,49 +1101,12 @@ export default function CanvasBoard({
                 </div>
               </>
             )}
-
-          {selectedNodeObj && selectedNodeObj.type === 'FloatingText' && (
-            <div className="space-y-3">
-              <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
-                Text Color
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  '#1e293b',
-                  '#64748b',
-                  '#ef4444',
-                  '#f97316',
-                  '#f59e0b',
-                  '#84cc16',
-                  '#10b981',
-                  '#06b6d4',
-                  '#3b82f6',
-                  '#6366f1',
-                  '#a855f7',
-                  '#ec4899',
-                ].map((c) => (
-                  <button
-                    key={c}
-                    className={cn(
-                      'w-7 h-7 rounded-lg border-2 transition-transform',
-                      selectedNodeObj.style?.color === c ||
-                        (c === '#1e293b' && !selectedNodeObj.style?.color)
-                        ? 'border-slate-800 scale-110'
-                        : 'border-transparent hover:scale-110',
-                    )}
-                    style={{ backgroundColor: c }}
-                    onClick={() => updateNodeStyle({ color: c })}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
 
           {selectedEdgeObj && (
             <>
               <div className="space-y-3">
-                <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
-                  Stroke Style
+                <label className="text-[11px] font-bold text-[#8C7B6C] uppercase tracking-wider block">
+                  Estilo da Linha
                 </label>
                 <div className="flex gap-2">
                   <button
@@ -1413,8 +1114,8 @@ export default function CanvasBoard({
                       'flex-1 h-9 rounded-lg border-2 flex items-center justify-center transition-colors',
                       selectedEdgeObj.style?.strokeDasharray === 'none' ||
                         !selectedEdgeObj.style?.strokeDasharray
-                        ? 'border-primary bg-primary/10 text-primary'
-                        : 'border-slate-100 bg-white hover:bg-slate-50 text-slate-400',
+                        ? 'border-[#C2714F] bg-[#C2714F]/10 text-[#C2714F]'
+                        : 'border-[#E8E2D9] bg-white hover:bg-[#FAF7F2] text-[#8C7B6C]',
                     )}
                     onClick={() => updateEdgeStyle({ strokeDasharray: 'none' })}
                   >
@@ -1433,8 +1134,8 @@ export default function CanvasBoard({
                     className={cn(
                       'flex-1 h-9 rounded-lg border-2 flex items-center justify-center transition-colors',
                       selectedEdgeObj.style?.strokeDasharray === '8 8'
-                        ? 'border-primary bg-primary/10 text-primary'
-                        : 'border-slate-100 bg-white hover:bg-slate-50 text-slate-400',
+                        ? 'border-[#C2714F] bg-[#C2714F]/10 text-[#C2714F]'
+                        : 'border-[#E8E2D9] bg-white hover:bg-[#FAF7F2] text-[#8C7B6C]',
                     )}
                     onClick={() => updateEdgeStyle({ strokeDasharray: '8 8' })}
                   >
@@ -1450,34 +1151,12 @@ export default function CanvasBoard({
                       />
                     </svg>
                   </button>
-                  <button
-                    className={cn(
-                      'flex-1 h-9 rounded-lg border-2 flex items-center justify-center transition-colors',
-                      selectedEdgeObj.style?.strokeDasharray === '4 4'
-                        ? 'border-primary bg-primary/10 text-primary'
-                        : 'border-slate-100 bg-white hover:bg-slate-50 text-slate-400',
-                    )}
-                    onClick={() => updateEdgeStyle({ strokeDasharray: '4 4' })}
-                  >
-                    <svg width="24" height="2" className="overflow-visible">
-                      <line
-                        x1="0"
-                        y1="1"
-                        x2="24"
-                        y2="1"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeDasharray="2 4"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  </button>
                 </div>
               </div>
 
               <div className="space-y-3">
-                <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
-                  Line Thickness
+                <label className="text-[11px] font-bold text-[#8C7B6C] uppercase tracking-wider block">
+                  Espessura
                 </label>
                 <div className="flex gap-4 items-center">
                   <input
@@ -1485,45 +1164,15 @@ export default function CanvasBoard({
                     min="1"
                     max="8"
                     step="1"
-                    className="flex-1 accent-primary h-1.5 bg-slate-100 rounded-full appearance-none cursor-pointer"
+                    className="flex-1 accent-[#C2714F] h-1.5 bg-[#E8E2D9] rounded-full appearance-none cursor-pointer"
                     value={selectedEdgeObj.style?.strokeWidth || 2}
                     onChange={(e) =>
                       updateEdgeStyle({ strokeWidth: parseInt(e.target.value) })
                     }
                   />
-                  <span className="text-[13px] font-medium text-slate-600 w-4 text-center">
+                  <span className="text-[13px] font-bold text-[#3D2B1F] w-4 text-center">
                     {selectedEdgeObj.style?.strokeWidth || 2}
                   </span>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
-                  Color
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    '#cbd5e1',
-                    '#a855f7',
-                    '#3b82f6',
-                    '#10b981',
-                    '#f59e0b',
-                    '#ef4444',
-                    '#1e293b',
-                  ].map((c) => (
-                    <button
-                      key={c}
-                      className={cn(
-                        'w-7 h-7 rounded-lg border-2 transition-transform',
-                        selectedEdgeObj.style?.stroke === c ||
-                          (c === '#cbd5e1' && !selectedEdgeObj.style?.stroke)
-                          ? 'border-slate-800 scale-110'
-                          : 'border-transparent hover:scale-110',
-                      )}
-                      style={{ backgroundColor: c }}
-                      onClick={() => updateEdgeStyle({ stroke: c })}
-                    />
-                  ))}
                 </div>
               </div>
             </>
@@ -1534,7 +1183,7 @@ export default function CanvasBoard({
       <div
         ref={boardRef}
         className={cn(
-          'flex-1 relative canvas-container overflow-hidden',
+          'flex-1 relative canvas-container overflow-hidden canvas-grid',
           isPanning
             ? 'cursor-grabbing'
             : isSpacePressed || activeTool === 'Pan'
@@ -1545,7 +1194,7 @@ export default function CanvasBoard({
         )}
         style={{
           backgroundPosition: `${transform.x}px ${transform.y}px`,
-          backgroundSize: `${28 * transform.scale}px ${28 * transform.scale}px`,
+          backgroundSize: `${24 * transform.scale}px ${24 * transform.scale}px`,
         }}
         onContextMenu={(e) => e.preventDefault()}
         onPointerDown={handlePointerDown}
@@ -1582,7 +1231,7 @@ export default function CanvasBoard({
                   x,
                   y,
                   data: { name: 'New Text', status: '', subtitle: '' },
-                  style: { color: '#1e293b' },
+                  style: { color: '#3D2B1F' },
                 },
               ],
             })
@@ -1598,6 +1247,18 @@ export default function CanvasBoard({
           className="absolute inset-0 w-full h-full pointer-events-none"
         >
           <svg className="absolute inset-0 w-full h-full overflow-visible z-0 pointer-events-none">
+            <defs>
+              <linearGradient
+                id="edge-gradient"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="0%"
+              >
+                <stop offset="0%" stopColor="#C2714F" />
+                <stop offset="100%" stopColor="#8C7B6C" />
+              </linearGradient>
+            </defs>
             {funnel.edges.map((e) => {
               const sourceNode = getEffectiveNode(
                 funnel.nodes.find((n) => n.id === e.source),
@@ -1619,11 +1280,12 @@ export default function CanvasBoard({
                 targetNode.y,
               )
 
-              const d = `M ${sourceCoords.x} ${sourceCoords.y} C ${sourceCoords.x + 50} ${sourceCoords.y}, ${targetCoords.x - 50} ${targetCoords.y}, ${targetCoords.x} ${targetCoords.y}`
+              const d = `M ${sourceCoords.x} ${sourceCoords.y} C ${sourceCoords.x + 80} ${sourceCoords.y}, ${targetCoords.x - 80} ${targetCoords.y}, ${targetCoords.x} ${targetCoords.y}`
 
               const strokeColor =
-                e.style?.stroke || (isSelected ? '#a855f7' : '#cbd5e1')
-              const strokeWidth = e.style?.strokeWidth || (isSelected ? 3 : 2)
+                e.style?.stroke ||
+                (isSelected ? '#C2714F' : 'url(#edge-gradient)')
+              const strokeWidth = e.style?.strokeWidth || (isSelected ? 4 : 3)
               const strokeDasharray = e.style?.strokeDasharray || 'none'
 
               return (
@@ -1634,7 +1296,11 @@ export default function CanvasBoard({
                   strokeWidth={strokeWidth}
                   strokeDasharray={strokeDasharray}
                   fill="none"
-                  className="transition-colors cursor-pointer hover:stroke-slate-400 pointer-events-auto"
+                  strokeLinecap="round"
+                  className={cn(
+                    'transition-colors cursor-pointer pointer-events-auto',
+                    !isSelected && 'hover:stroke-[#C2714F]/70',
+                  )}
                   onClick={(ev) => {
                     ev.stopPropagation()
                     if (activeTool === 'Select') {
@@ -1654,63 +1320,14 @@ export default function CanvasBoard({
                 const sourceCoords = getRightPortCoords(sNode, sNode.x, sNode.y)
                 return (
                   <path
-                    d={`M ${sourceCoords.x} ${sourceCoords.y} C ${sourceCoords.x + 50} ${sourceCoords.y}, ${drawingEdge.currentX - 50} ${drawingEdge.currentY}, ${drawingEdge.currentX} ${drawingEdge.currentY}`}
-                    stroke="#a855f7"
-                    strokeWidth="2"
+                    d={`M ${sourceCoords.x} ${sourceCoords.y} C ${sourceCoords.x + 80} ${sourceCoords.y}, ${drawingEdge.currentX - 80} ${drawingEdge.currentY}, ${drawingEdge.currentX} ${drawingEdge.currentY}`}
+                    stroke="#C2714F"
+                    strokeWidth="3"
                     strokeDasharray="4 4"
                     fill="none"
+                    strokeLinecap="round"
                   />
                 )
-              })()}
-            {creatingShape &&
-              (() => {
-                const w = Math.abs(
-                  creatingShape.currentX - creatingShape.startX,
-                )
-                const h = Math.abs(
-                  creatingShape.currentY - creatingShape.startY,
-                )
-                const x = Math.min(creatingShape.startX, creatingShape.currentX)
-                const y = Math.min(creatingShape.startY, creatingShape.currentY)
-
-                if (creatingShape.type === 'Square')
-                  return (
-                    <rect
-                      x={x}
-                      y={y}
-                      width={w}
-                      height={h}
-                      rx={8}
-                      fill="rgba(244, 81, 11, 0.1)"
-                      stroke="#f4510b"
-                      strokeWidth={2 / transform.scale}
-                      strokeDasharray="4 4"
-                    />
-                  )
-                if (creatingShape.type === 'Circle')
-                  return (
-                    <ellipse
-                      cx={x + w / 2}
-                      cy={y + h / 2}
-                      rx={w / 2}
-                      ry={h / 2}
-                      fill="rgba(244, 81, 11, 0.1)"
-                      stroke="#f4510b"
-                      strokeWidth={2 / transform.scale}
-                      strokeDasharray="4 4"
-                    />
-                  )
-                if (creatingShape.type === 'Diamond')
-                  return (
-                    <polygon
-                      points={`${x + w / 2},${y} ${x + w},${y + h / 2} ${x + w / 2},${y + h} ${x},${y + h / 2}`}
-                      fill="rgba(244, 81, 11, 0.1)"
-                      stroke="#f4510b"
-                      strokeWidth={2 / transform.scale}
-                      strokeDasharray="4 4"
-                      strokeLinejoin="round"
-                    />
-                  )
               })()}
             {selectionBox &&
               (() => {
@@ -1724,9 +1341,10 @@ export default function CanvasBoard({
                     y={y}
                     width={w}
                     height={h}
-                    fill="rgba(244, 81, 11, 0.08)"
-                    stroke="#f4510b"
-                    strokeWidth={1 / transform.scale}
+                    fill="rgba(194, 113, 79, 0.1)"
+                    stroke="#C2714F"
+                    strokeWidth={2 / transform.scale}
+                    rx={8}
                   />
                 )
               })()}

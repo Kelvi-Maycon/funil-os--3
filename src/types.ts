@@ -14,6 +14,8 @@ export type NodeData = {
   description?: string
   isTaskMode?: boolean
   isCompleted?: boolean
+  retention?: string
+  metrics?: { label: string; value: string }[]
   linkedDocumentIds?: string[]
   linkedAssetIds?: string[]
   linkedTaskIds?: string[]

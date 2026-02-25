@@ -12,13 +12,14 @@ import {
   CheckCircle,
   FileText,
   Megaphone,
+  PlayCircle,
 } from 'lucide-react'
 import { Funnel } from '@/types'
 
 const BLOCK_CATEGORIES = [
   {
     title: 'MESSAGES',
-    iconColor: 'text-purple-500',
+    iconColor: 'text-[#C2714F]',
     blocks: [
       { type: 'Email', icon: Mail, label: 'Email' },
       { type: 'Slack', icon: MessageSquare, label: 'Slack' },
@@ -29,14 +30,15 @@ const BLOCK_CATEGORIES = [
   },
   {
     title: 'DELAYS',
-    iconColor: 'text-purple-500',
+    iconColor: 'text-[#C2714F]',
     blocks: [{ type: 'Wait', icon: Clock, label: 'Wait Until' }],
   },
   {
     title: 'PAGES',
-    iconColor: 'text-purple-500',
+    iconColor: 'text-[#C2714F]',
     blocks: [
       { type: 'LandingPage', icon: LayoutTemplate, label: 'Landing Page' },
+      { type: 'VSL', icon: PlayCircle, label: 'VSL Page' },
       { type: 'Checkout', icon: CreditCard, label: 'Checkout' },
       { type: 'Upsell', icon: ArrowUpCircle, label: 'Upsell' },
       { type: 'ThankYou', icon: CheckCircle, label: 'Thank You' },
@@ -52,7 +54,7 @@ export default function BlockPalette({ funnel }: { funnel: Funnel }) {
   }
 
   return (
-    <div className="w-[260px] h-[calc(100%-2rem)] bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.06)] flex flex-col overflow-hidden my-4 ml-4 z-20">
+    <div className="w-[260px] max-h-[calc(100vh-140px)] bg-white rounded-2xl border border-[#E8E2D9] shadow-xl flex flex-col overflow-hidden">
       <div className="flex-1 overflow-y-auto p-5 no-scrollbar space-y-8">
         {BLOCK_CATEGORIES.map((cat, idx) => (
           <div key={idx} className="space-y-4">
@@ -60,7 +62,7 @@ export default function BlockPalette({ funnel }: { funnel: Funnel }) {
               <div
                 className={`w-2 h-2 rotate-45 bg-current ${cat.iconColor}`}
               />
-              <h4 className="text-[11px] font-bold text-slate-500 tracking-widest uppercase">
+              <h4 className="text-[11px] font-bold text-[#8C7B6C] tracking-widest uppercase">
                 {cat.title}
               </h4>
             </div>
@@ -70,14 +72,14 @@ export default function BlockPalette({ funnel }: { funnel: Funnel }) {
                   key={block.type}
                   draggable
                   onDragStart={(e) => onDragStart(e, block.type)}
-                  className="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-2xl cursor-grab active:cursor-grabbing transition-colors text-slate-700 border border-transparent hover:border-slate-100"
+                  className="flex items-center gap-4 p-3 hover:bg-[#FAF7F2] rounded-2xl cursor-grab active:cursor-grabbing transition-colors text-[#3D2B1F] border border-transparent hover:border-[#E8E2D9]"
                 >
                   <block.icon
                     size={18}
-                    className="text-slate-400 shrink-0"
-                    strokeWidth={1.5}
+                    className="text-[#8C7B6C] shrink-0"
+                    strokeWidth={2}
                   />
-                  <span className="text-[13px] font-medium truncate">
+                  <span className="text-[13px] font-bold truncate">
                     {block.label}
                   </span>
                 </div>

@@ -26,7 +26,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['DM Sans', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
         inter: ['Inter', 'system-ui', 'sans-serif'],
       },
       fontSize: {
@@ -49,7 +49,7 @@ export default {
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
-          subtle: 'rgba(244, 81, 11, 0.08)',
+          subtle: 'rgba(194, 113, 79, 0.08)',
         },
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
@@ -86,24 +86,24 @@ export default {
           ring: 'hsl(var(--sidebar-ring))',
         },
         success: {
-          DEFAULT: '#22C55E',
-          foreground: '#15803D',
-          bg: '#ECFDF5',
+          DEFAULT: 'hsl(var(--success))',
+          foreground: 'hsl(var(--success-foreground))',
+          bg: 'hsl(var(--success-bg))',
         },
         warning: {
-          DEFAULT: '#F59E0B',
-          foreground: '#B45309',
-          bg: '#FFFBEB',
+          DEFAULT: 'hsl(var(--warning))',
+          foreground: 'hsl(var(--warning-foreground))',
+          bg: 'hsl(var(--warning-bg))',
         },
         danger: {
-          DEFAULT: '#EF4444',
-          foreground: '#B91C1C',
-          bg: '#FEF2F2',
+          DEFAULT: 'hsl(var(--danger))',
+          foreground: 'hsl(var(--danger-foreground))',
+          bg: 'hsl(var(--danger-bg))',
         },
         info: {
-          DEFAULT: '#3B82F6',
-          foreground: '#1D4ED8',
-          bg: '#EFF6FF',
+          DEFAULT: 'hsl(var(--info))',
+          foreground: 'hsl(var(--info-foreground))',
+          bg: 'hsl(var(--info-bg))',
         },
       },
       borderRadius: {

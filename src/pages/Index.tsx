@@ -9,12 +9,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
   format,
   isToday,
   isPast,
@@ -24,12 +18,10 @@ import {
 } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import {
-  CheckCircle2,
   Clock,
   Target,
   CheckSquare,
   Layers,
-  Plus,
   ArrowRight,
   Network,
   FileText,
@@ -79,40 +71,33 @@ export default function Index() {
 
   return (
     <div className="p-6 md:p-8 max-w-[1600px] w-full mx-auto space-y-8 animate-fade-in">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="space-y-1">
-          <h1 className="text-4xl font-bold tracking-tight text-foreground">
-            Bom dia, João
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 md:px-8 border-b border-border -mx-6 -mt-6 md:-mx-8 md:-mt-8 mb-8 min-h-[80px]">
+        <div className="space-y-0.5">
+          <h1 className="text-xl font-bold tracking-tight text-foreground">
+            Dashboard
           </h1>
-          <p className="text-muted-foreground capitalize text-md">
-            {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
-          </p>
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+              Sistema Online
+            </span>
+          </div>
         </div>
+        <div className="flex items-center gap-3">
+          <Button variant="dark">Exportar Relatório</Button>
+          <Button onClick={() => setAction({ type: 'task', mode: 'create' })}>
+            Quick Action
+          </Button>
+        </div>
+      </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="dark">
-              <Plus className="mr-2" size={16} /> Quick Action
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem
-              onClick={() => setAction({ type: 'canvas', mode: 'create' })}
-            >
-              Novo Canvas
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => setAction({ type: 'task', mode: 'create' })}
-            >
-              Nova Tarefa
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => setAction({ type: 'document', mode: 'create' })}
-            >
-              Novo Documento
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      <div className="space-y-1">
+        <h2 className="text-3xl font-bold tracking-tight text-foreground">
+          Bom dia, Diego
+        </h2>
+        <p className="text-muted-foreground capitalize text-md">
+          {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
+        </p>
       </div>
 
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
@@ -194,13 +179,11 @@ export default function Index() {
         </Card>
       </div>
 
-      {/* Plano de Ação */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold tracking-tight text-foreground">
           Plano de Ação
         </h2>
         <div className="grid gap-4 md:grid-cols-3">
-          {/* Atrasadas */}
           <Card
             className={
               overdueTasks.length > 0 ? 'border-red-200 bg-red-50/30' : ''
@@ -239,7 +222,6 @@ export default function Index() {
             </CardContent>
           </Card>
 
-          {/* Hoje */}
           <Card
             className={
               todayTasks.length > 0 ? 'border-amber-200 bg-amber-50/30' : ''
@@ -278,7 +260,6 @@ export default function Index() {
             </CardContent>
           </Card>
 
-          {/* Esta Semana */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-blue-600 flex items-center gap-1.5">
@@ -314,7 +295,6 @@ export default function Index() {
           </Card>
         </div>
 
-        {/* Quick Add */}
         <form onSubmit={addQuickTask} className="flex items-center gap-2">
           <Input
             placeholder="➕ Adicionar task rápida..."
@@ -329,7 +309,7 @@ export default function Index() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-1 lg:max-w-3xl">
-        <Card className="flex flex-col bg-secondary text-secondary-foreground relative overflow-hidden border-none shadow-md">
+        <Card className="flex flex-col bg-[#3D2B1F] text-[#FAF7F2] relative overflow-hidden border-none shadow-md">
           <div className="absolute -right-12 -top-12 w-48 h-48 rounded-full border-[12px] border-white opacity-5 pointer-events-none"></div>
           <div className="absolute -left-12 -bottom-12 w-32 h-32 rounded-full border-[8px] border-white opacity-5 pointer-events-none"></div>
           <CardHeader className="relative z-10">

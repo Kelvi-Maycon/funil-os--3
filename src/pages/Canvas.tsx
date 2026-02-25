@@ -10,7 +10,7 @@ export default function Canvas() {
 
   if (!funnel)
     return (
-      <div className="p-8 text-center text-slate-500">
+      <div className="p-8 text-center text-[#8C7B6C] font-bold">
         Funil não encontrado.
       </div>
     )
@@ -20,7 +20,7 @@ export default function Canvas() {
   }
 
   return (
-    <div className="h-full flex flex-col overflow-hidden animate-fade-in bg-[#f8fafc] relative">
+    <div className="h-full flex flex-col overflow-hidden animate-fade-in bg-[#FAF7F2] relative">
       <div className="flex-1 relative flex overflow-hidden">
         <CanvasBoard funnel={funnel} onChange={updateFunnel} />
       </div>
