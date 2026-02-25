@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, memo, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Funnel, Node, Edge, NodeData, Resource } from '@/types'
 import { generateId } from '@/lib/generateId'
@@ -78,6 +78,79 @@ const getApproxBounds = (n: Node) => {
   }
   return { x: n.x, y: n.y, w, h }
 }
+
+const EdgeItem = memo(
+  ({
+    edge,
+    sourceNode,
+    targetNode,
+    isSelected,
+    activeTool,
+    onSelect,
+  }: {
+    edge: Edge
+    sourceNode: Node
+    targetNode: Node
+    isSelected: boolean
+    activeTool: string
+    onSelect: (e: React.PointerEvent) => void
+  }) => {
+    const sourceCoords = getRightPortCoords(
+      sourceNode,
+      sourceNode.x,
+      sourceNode.y,
+    )
+    const targetCoords = getLeftPortCoords(
+      targetNode,
+      targetNode.x,
+      targetNode.y,
+    )
+
+    const d = `M ${sourceCoords.x} ${sourceCoords.y} C ${sourceCoords.x + 80} ${sourceCoords.y}, ${targetCoords.x - 80} ${targetCoords.y}, ${targetCoords.x} ${targetCoords.y}`
+
+    const strokeColor =
+      edge.style?.stroke || (isSelected ? '#C2714F' : 'url(#edge-gradient)')
+    const strokeWidth = edge.style?.strokeWidth || (isSelected ? 4 : 3)
+    const strokeDasharray = edge.style?.strokeDasharray || 'none'
+
+    return (
+      <path
+        d={d}
+        stroke={strokeColor}
+        strokeWidth={strokeWidth}
+        strokeDasharray={strokeDasharray}
+        fill="none"
+        strokeLinecap="round"
+        className={cn(
+          'transition-colors cursor-pointer pointer-events-auto',
+          !isSelected && 'hover:stroke-[#C2714F]/70',
+        )}
+        onClick={onSelect}
+      />
+    )
+  },
+  (prev, next) => {
+    return (
+      prev.edge === next.edge &&
+      prev.sourceNode === next.sourceNode &&
+      prev.targetNode === next.targetNode &&
+      prev.isSelected === next.isSelected &&
+      prev.activeTool === next.activeTool
+    )
+  },
+)
+
+const MemoizedNodeItem = memo(NodeItem, (prev, next) => {
+  return (
+    prev.node === next.node &&
+    prev.selected === next.selected &&
+    prev.snapToGrid === next.snapToGrid &&
+    prev.activeTool === next.activeTool &&
+    prev.taskProgress.total === next.taskProgress.total &&
+    prev.taskProgress.completed === next.taskProgress.completed &&
+    prev.scale === next.scale
+  )
+})
 
 export default function CanvasBoard({
   funnel,
@@ -168,6 +241,31 @@ export default function CanvasBoard({
   const [settingsNodeId, setSettingsNodeId] = useState<string | null>(null)
   const boardRef = useRef<HTMLDivElement>(null)
 
+  const latest = useRef({
+    funnel,
+    selectedNodes,
+    snapToGrid,
+    transform,
+    rightPanelState,
+    settingsNodeId,
+    docs,
+    tasks,
+    resources,
+    activeTool,
+  })
+  latest.current = {
+    funnel,
+    selectedNodes,
+    snapToGrid,
+    transform,
+    rightPanelState,
+    settingsNodeId,
+    docs,
+    tasks,
+    resources,
+    activeTool,
+  }
+
   const targetNodeId = searchParams.get('nodeId')
   useEffect(() => {
     if (targetNodeId && funnel.nodes.length > 0) {
@@ -195,6 +293,7 @@ export default function CanvasBoard({
   ])
 
   const handleGroupSelected = useCallback(() => {
+    const { funnel, selectedNodes } = latest.current
     if (selectedNodes.length < 2) return
     const groupId = generateId('g')
     onChangeWithHistory({
@@ -204,9 +303,11 @@ export default function CanvasBoard({
       ),
     })
     toast({ title: 'Elementos agrupados.' })
-  }, [funnel, selectedNodes, onChangeWithHistory, toast])
+  }, [onChangeWithHistory, toast])
 
   const handleDeleteSelected = useCallback(() => {
+    const { funnel, selectedNodes, rightPanelState, settingsNodeId } =
+      latest.current
     if (selectedNodes.length === 0) return
     onChangeWithHistory({
       ...funnel,
@@ -222,16 +323,10 @@ export default function CanvasBoard({
       setRightPanelState(null)
     if (settingsNodeId && selectedNodes.includes(settingsNodeId))
       setSettingsNodeId(null)
-  }, [
-    funnel,
-    selectedNodes,
-    onChangeWithHistory,
-    rightPanelState,
-    settingsNodeId,
-    setSelectedNodes,
-  ])
+  }, [onChangeWithHistory, setSelectedNodes])
 
   const handleConfirmDelete = useCallback(() => {
+    const { funnel, rightPanelState, settingsNodeId } = latest.current
     if (nodeToDelete === 'selected') {
       handleDeleteSelected()
     } else if (nodeToDelete && nodeToDelete !== 'selected') {
@@ -246,14 +341,7 @@ export default function CanvasBoard({
       if (settingsNodeId === nodeToDelete) setSettingsNodeId(null)
     }
     setNodeToDelete(null)
-  }, [
-    nodeToDelete,
-    handleDeleteSelected,
-    funnel,
-    onChangeWithHistory,
-    rightPanelState,
-    settingsNodeId,
-  ])
+  }, [nodeToDelete, handleDeleteSelected, onChangeWithHistory])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -287,7 +375,8 @@ export default function CanvasBoard({
           break
         case 'delete':
         case 'backspace':
-          if (selectedNodes.length > 0) setNodeToDelete('selected')
+          if (latest.current.selectedNodes.length > 0)
+            setNodeToDelete('selected')
           break
         case 'g':
           if (e.ctrlKey || e.metaKey) {
@@ -299,9 +388,9 @@ export default function CanvasBoard({
           if (e.ctrlKey || e.metaKey) {
             e.preventDefault()
             if (e.shiftKey) {
-              redo(funnel, onChange)
+              redo(latest.current.funnel, onChange)
             } else {
-              undo(funnel, onChange)
+              undo(latest.current.funnel, onChange)
             }
           }
           break
@@ -318,15 +407,7 @@ export default function CanvasBoard({
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [
-    handleDeleteSelected,
-    handleGroupSelected,
-    selectedNodes.length,
-    undo,
-    redo,
-    funnel,
-    onChange,
-  ])
+  }, [handleGroupSelected, undo, redo, onChange])
 
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
@@ -334,6 +415,7 @@ export default function CanvasBoard({
       if (!items) return
       for (let i = 0; i < items.length; i++) {
         if (items[i].type.indexOf('image') !== -1) {
+          const { funnel, transform } = latest.current
           const newAsset: Resource = {
             id: generateId('a'),
             projectId: funnel.projectId,
@@ -368,14 +450,7 @@ export default function CanvasBoard({
     }
     window.addEventListener('paste', handlePaste)
     return () => window.removeEventListener('paste', handlePaste)
-  }, [
-    funnel,
-    setResources,
-    transform,
-    onChangeWithHistory,
-    setSelectedNodes,
-    toast,
-  ])
+  }, [setResources, onChangeWithHistory, setSelectedNodes, toast])
 
   useEffect(() => {
     const el = boardRef.current
@@ -604,83 +679,98 @@ export default function CanvasBoard({
     setSelectedNodes([newNodeId])
   }
 
-  const handleEdgeDragStart = (nodeId: string, e: React.PointerEvent) => {
-    if (e.button !== 0) return
-    const rect = boardRef.current?.getBoundingClientRect()
-    if (!rect) return
-    const getCoords = (cx: number, cy: number) => ({
-      x: (cx - rect.left - transform.x) / transform.scale,
-      y: (cy - rect.top - transform.y) / transform.scale,
-    })
-    const coords = getCoords(e.clientX, e.clientY)
-    setDrawingEdge({ source: nodeId, currentX: coords.x, currentY: coords.y })
-
-    const onMove = (ev: PointerEvent) => {
-      const coords = getCoords(ev.clientX, ev.clientY)
-      setDrawingEdge((prev) =>
-        prev ? { ...prev, currentX: coords.x, currentY: coords.y } : null,
-      )
-    }
-    const onUp = (ev: PointerEvent) => {
-      const targetNodeEl = document
-        .elementFromPoint(ev.clientX, ev.clientY)
-        ?.closest('[data-node-id]')
-      if (targetNodeEl) {
-        const targetId = targetNodeEl.getAttribute('data-node-id')
-        if (
-          targetId &&
-          targetId !== nodeId &&
-          !funnel.edges.some(
-            (edge) => edge.source === nodeId && edge.target === targetId,
-          )
-        ) {
-          onChangeWithHistory({
-            ...funnel,
-            edges: [
-              ...funnel.edges,
-              { id: generateId('e'), source: nodeId, target: targetId },
-            ],
-          })
+  const handleEdgeDragStart = useCallback(
+    (nodeId: string, e: React.PointerEvent) => {
+      if (e.button !== 0) return
+      const rect = boardRef.current?.getBoundingClientRect()
+      if (!rect) return
+      const getCoords = (cx: number, cy: number) => {
+        const { transform } = latest.current
+        return {
+          x: (cx - rect.left - transform.x) / transform.scale,
+          y: (cy - rect.top - transform.y) / transform.scale,
         }
       }
-      setDrawingEdge(null)
-      window.removeEventListener('pointermove', onMove)
-      window.removeEventListener('pointerup', onUp)
-      window.removeEventListener('pointercancel', onUp)
-    }
-    window.addEventListener('pointermove', onMove)
-    window.addEventListener('pointerup', onUp)
-    window.addEventListener('pointercancel', onUp)
-  }
+      const coords = getCoords(e.clientX, e.clientY)
+      setDrawingEdge({ source: nodeId, currentX: coords.x, currentY: coords.y })
 
-  const handleAddChild = (parentId: string) => {
-    const parent = funnel.nodes.find((n) => n.id === parentId)
-    if (!parent) return
-    const newId = generateId('n')
-    let newX = parent.x + 350,
-      newY = parent.y
-    if (snapToGrid) {
-      newX = Math.round(newX / 28) * 28
-      newY = Math.round(newY / 28) * 28
-    }
-    onChangeWithHistory({
-      ...funnel,
-      nodes: [
-        ...funnel.nodes,
-        {
-          id: newId,
-          type: 'Default',
-          x: newX,
-          y: newY,
-          data: { name: 'New Step', status: 'A Fazer', subtitle: '+1 filter' },
-        },
-      ],
-      edges: [
-        ...funnel.edges,
-        { id: generateId('e'), source: parentId, target: newId },
-      ],
-    })
-  }
+      const onMove = (ev: PointerEvent) => {
+        const coords = getCoords(ev.clientX, ev.clientY)
+        setDrawingEdge((prev) =>
+          prev ? { ...prev, currentX: coords.x, currentY: coords.y } : null,
+        )
+      }
+      const onUp = (ev: PointerEvent) => {
+        const targetNodeEl = document
+          .elementFromPoint(ev.clientX, ev.clientY)
+          ?.closest('[data-node-id]')
+        if (targetNodeEl) {
+          const targetId = targetNodeEl.getAttribute('data-node-id')
+          const { funnel } = latest.current
+          if (
+            targetId &&
+            targetId !== nodeId &&
+            !funnel.edges.some(
+              (edge) => edge.source === nodeId && edge.target === targetId,
+            )
+          ) {
+            onChangeWithHistory({
+              ...funnel,
+              edges: [
+                ...funnel.edges,
+                { id: generateId('e'), source: nodeId, target: targetId },
+              ],
+            })
+          }
+        }
+        setDrawingEdge(null)
+        window.removeEventListener('pointermove', onMove)
+        window.removeEventListener('pointerup', onUp)
+        window.removeEventListener('pointercancel', onUp)
+      }
+      window.addEventListener('pointermove', onMove)
+      window.addEventListener('pointerup', onUp)
+      window.addEventListener('pointercancel', onUp)
+    },
+    [onChangeWithHistory],
+  )
+
+  const handleAddChild = useCallback(
+    (parentId: string) => {
+      const { funnel, snapToGrid } = latest.current
+      const parent = funnel.nodes.find((n) => n.id === parentId)
+      if (!parent) return
+      const newId = generateId('n')
+      let newX = parent.x + 350,
+        newY = parent.y
+      if (snapToGrid) {
+        newX = Math.round(newX / 28) * 28
+        newY = Math.round(newY / 28) * 28
+      }
+      onChangeWithHistory({
+        ...funnel,
+        nodes: [
+          ...funnel.nodes,
+          {
+            id: newId,
+            type: 'Default',
+            x: newX,
+            y: newY,
+            data: {
+              name: 'New Step',
+              status: 'A Fazer',
+              subtitle: '+1 filter',
+            },
+          },
+        ],
+        edges: [
+          ...funnel.edges,
+          { id: generateId('e'), source: parentId, target: newId },
+        ],
+      })
+    },
+    [onChangeWithHistory],
+  )
 
   const handleAddAnnotation = (type: 'Text' | 'Image', name: string) => {
     const newNodeId = generateId('n')
@@ -701,42 +791,46 @@ export default function CanvasBoard({
     setSelectedNodes([newNodeId])
   }
 
-  const handleDropResource = (nodeId: string, type: string, id: string) => {
-    const updatedNodes = funnel.nodes.map((n) => {
-      if (n.id === nodeId) {
-        const key =
-          type === 'document'
-            ? 'linkedDocumentIds'
-            : type === 'task'
-              ? 'linkedTaskIds'
-              : 'linkedAssetIds'
-        const currentIds = (n.data[key as keyof NodeData] as string[]) || []
-        if (!currentIds.includes(id))
-          return { ...n, data: { ...n.data, [key]: [...currentIds, id] } }
-      }
-      return n
-    })
-    onChangeWithHistory({ ...funnel, nodes: updatedNodes })
+  const handleDropResource = useCallback(
+    (nodeId: string, type: string, id: string) => {
+      const { funnel, docs, tasks, resources } = latest.current
+      const updatedNodes = funnel.nodes.map((n) => {
+        if (n.id === nodeId) {
+          const key =
+            type === 'document'
+              ? 'linkedDocumentIds'
+              : type === 'task'
+                ? 'linkedTaskIds'
+                : 'linkedAssetIds'
+          const currentIds = (n.data[key as keyof NodeData] as string[]) || []
+          if (!currentIds.includes(id))
+            return { ...n, data: { ...n.data, [key]: [...currentIds, id] } }
+        }
+        return n
+      })
+      onChangeWithHistory({ ...funnel, nodes: updatedNodes })
 
-    if (type === 'document')
-      setDocs(
-        docs.map((d) =>
-          d.id === id ? { ...d, funnelId: funnel.id, nodeId } : d,
-        ),
-      )
-    else if (type === 'task')
-      setTasks(
-        tasks.map((t) =>
-          t.id === id ? { ...t, funnelId: funnel.id, nodeId } : t,
-        ),
-      )
-    else if (type === 'asset')
-      setResources(
-        resources.map((a) =>
-          a.id === id ? { ...a, projectId: funnel.projectId } : a,
-        ),
-      )
-  }
+      if (type === 'document')
+        setDocs(
+          docs.map((d) =>
+            d.id === id ? { ...d, funnelId: funnel.id, nodeId } : d,
+          ),
+        )
+      else if (type === 'task')
+        setTasks(
+          tasks.map((t) =>
+            t.id === id ? { ...t, funnelId: funnel.id, nodeId } : t,
+          ),
+        )
+      else if (type === 'asset')
+        setResources(
+          resources.map((a) =>
+            a.id === id ? { ...a, projectId: funnel.projectId } : a,
+          ),
+        )
+    },
+    [onChangeWithHistory, setDocs, setTasks, setResources],
+  )
 
   const updateEdgeStyle = (styleUpdates: Partial<Edge['style']>) => {
     if (selectedEdge) {
@@ -764,21 +858,25 @@ export default function CanvasBoard({
     }
   }
 
-  const handleNodePointerDown = (id: string, shiftKey: boolean) => {
-    const n = funnel.nodes.find((x) => x.id === id)
-    if (!n) return
-    const groupMembers = n.groupId
-      ? funnel.nodes.filter((x) => x.groupId === n.groupId).map((x) => x.id)
-      : [id]
-    if (!selectedNodes.includes(id)) {
-      if (shiftKey)
-        setSelectedNodes([...new Set([...selectedNodes, ...groupMembers])])
-      else setSelectedNodes(groupMembers)
-      setSelectedEdge(null)
-    } else if (shiftKey) {
-      setSelectedNodes(selectedNodes.filter((x) => !groupMembers.includes(x)))
-    }
-  }
+  const handleNodePointerDown = useCallback(
+    (id: string, shiftKey: boolean) => {
+      const { funnel, selectedNodes } = latest.current
+      const n = funnel.nodes.find((x) => x.id === id)
+      if (!n) return
+      const groupMembers = n.groupId
+        ? funnel.nodes.filter((x) => x.groupId === n.groupId).map((x) => x.id)
+        : [id]
+      if (!selectedNodes.includes(id)) {
+        if (shiftKey)
+          setSelectedNodes([...new Set([...selectedNodes, ...groupMembers])])
+        else setSelectedNodes(groupMembers)
+        setSelectedEdge(null)
+      } else if (shiftKey) {
+        setSelectedNodes(selectedNodes.filter((x) => !groupMembers.includes(x)))
+      }
+    },
+    [setSelectedNodes, setSelectedEdge],
+  )
 
   const rightOffset = rightPanelState ? 'right-80' : 'right-6'
   const canvasTools = [
@@ -811,22 +909,41 @@ export default function CanvasBoard({
       : undefined
   const selectedEdgeObj = funnel.edges.find((e) => e.id === selectedEdge)
 
-  const getEffectiveNode = (n: Node | undefined) => {
-    if (!n) return undefined
-    if (resizingNode?.id === n.id) {
-      return {
-        ...n,
-        x: resizingNode.x,
-        y: resizingNode.y,
-        width: resizingNode.width,
-        height: resizingNode.height,
+  const getEffectiveNode = useCallback(
+    (n: Node | undefined) => {
+      if (!n) return undefined
+      if (resizingNode?.id === n.id) {
+        return {
+          ...n,
+          x: resizingNode.x,
+          y: resizingNode.y,
+          width: resizingNode.width,
+          height: resizingNode.height,
+        }
       }
-    }
-    if (selectedNodes.includes(n.id) && dragState) {
-      return { ...n, x: n.x + dragState.dx, y: n.y + dragState.dy }
-    }
-    return n
-  }
+      if (selectedNodes.includes(n.id) && dragState) {
+        return { ...n, x: n.x + dragState.dx, y: n.y + dragState.dy }
+      }
+      return n
+    },
+    [resizingNode, selectedNodes, dragState],
+  )
+
+  const minimapNodes = useMemo(() => {
+    return funnel.nodes.map((n) => (
+      <div
+        key={n.id}
+        className="absolute bg-[#8C7B6C] rounded-xl opacity-50"
+        style={{
+          left: n.x,
+          top: n.y,
+          width:
+            n.width || (n.type === 'Text' || n.type === 'Image' ? 200 : 280),
+          height: n.height || 100,
+        }}
+      />
+    ))
+  }, [funnel.nodes])
 
   return (
     <div className="flex-1 flex relative overflow-hidden bg-transparent">
@@ -1003,20 +1120,7 @@ export default function CanvasBoard({
             className="w-full h-full relative bg-[#FAF7F2]"
             style={{ transform: 'scale(0.08)', transformOrigin: 'top left' }}
           >
-            {funnel.nodes.map((n) => (
-              <div
-                key={n.id}
-                className="absolute bg-[#8C7B6C] rounded-xl opacity-50"
-                style={{
-                  left: n.x,
-                  top: n.y,
-                  width:
-                    n.width ||
-                    (n.type === 'Text' || n.type === 'Image' ? 200 : 280),
-                  height: n.height || 100,
-                }}
-              />
-            ))}
+            {minimapNodes}
             <div
               className="absolute border-[6px] border-[#C2714F] bg-[#C2714F]/10 rounded-xl"
               style={{
@@ -1243,6 +1347,7 @@ export default function CanvasBoard({
           style={{
             transform: `translate3d(${transform.x}px, ${transform.y}px, 0) scale(${transform.scale})`,
             transformOrigin: '0 0',
+            willChange: 'transform',
           }}
           className="absolute inset-0 w-full h-full pointer-events-none"
         >
@@ -1269,41 +1374,17 @@ export default function CanvasBoard({
               if (!sourceNode || !targetNode) return null
               const isSelected = selectedEdge === e.id
 
-              const sourceCoords = getRightPortCoords(
-                sourceNode,
-                sourceNode.x,
-                sourceNode.y,
-              )
-              const targetCoords = getLeftPortCoords(
-                targetNode,
-                targetNode.x,
-                targetNode.y,
-              )
-
-              const d = `M ${sourceCoords.x} ${sourceCoords.y} C ${sourceCoords.x + 80} ${sourceCoords.y}, ${targetCoords.x - 80} ${targetCoords.y}, ${targetCoords.x} ${targetCoords.y}`
-
-              const strokeColor =
-                e.style?.stroke ||
-                (isSelected ? '#C2714F' : 'url(#edge-gradient)')
-              const strokeWidth = e.style?.strokeWidth || (isSelected ? 4 : 3)
-              const strokeDasharray = e.style?.strokeDasharray || 'none'
-
               return (
-                <path
+                <EdgeItem
                   key={e.id}
-                  d={d}
-                  stroke={strokeColor}
-                  strokeWidth={strokeWidth}
-                  strokeDasharray={strokeDasharray}
-                  fill="none"
-                  strokeLinecap="round"
-                  className={cn(
-                    'transition-colors cursor-pointer pointer-events-auto',
-                    !isSelected && 'hover:stroke-[#C2714F]/70',
-                  )}
-                  onClick={(ev) => {
+                  edge={e}
+                  sourceNode={sourceNode}
+                  targetNode={targetNode}
+                  isSelected={isSelected}
+                  activeTool={activeTool}
+                  onSelect={(ev) => {
                     ev.stopPropagation()
-                    if (activeTool === 'Select') {
+                    if (latest.current.activeTool === 'Select') {
                       setSelectedEdge(e.id)
                       setSelectedNodes([])
                     }
@@ -1369,7 +1450,7 @@ export default function CanvasBoard({
               const taskProgress = { total, completed }
 
               return (
-                <NodeItem
+                <MemoizedNodeItem
                   key={n.id}
                   node={getEffectiveNode(n)!}
                   selected={selectedNodes.includes(n.id)}
@@ -1383,6 +1464,7 @@ export default function CanvasBoard({
                     setDragState({ isDragging: true, dx, dy })
                   }
                   onMoveEnd={(dx, dy) => {
+                    const { funnel, selectedNodes } = latest.current
                     setDragState(null)
                     if (dx === 0 && dy === 0) return
                     onChangeWithHistory({
@@ -1398,6 +1480,7 @@ export default function CanvasBoard({
                     setResizingNode({ id: n.id, x, y, width: w, height: h })
                   }
                   onResizeEnd={(x, y, w, h) => {
+                    const { funnel } = latest.current
                     setResizingNode(null)
                     onChangeWithHistory({
                       ...funnel,
@@ -1410,6 +1493,7 @@ export default function CanvasBoard({
                   }}
                   onAddChild={() => handleAddChild(n.id)}
                   onDelete={() => {
+                    const { selectedNodes } = latest.current
                     if (selectedNodes.includes(n.id))
                       setNodeToDelete('selected')
                     else setNodeToDelete(n.id)
@@ -1418,7 +1502,8 @@ export default function CanvasBoard({
                     setRightPanelState({ nodeId: n.id, tab })
                   }
                   onOpenSettings={() => setSettingsNodeId(n.id)}
-                  onToggleComplete={() =>
+                  onToggleComplete={() => {
+                    const { funnel } = latest.current
                     onChangeWithHistory({
                       ...funnel,
                       nodes: funnel.nodes.map((node) =>
@@ -1433,9 +1518,10 @@ export default function CanvasBoard({
                           : node,
                       ),
                     })
-                  }
+                  }}
                   scale={transform.scale}
-                  onTextChange={(text) =>
+                  onTextChange={(text) => {
+                    const { funnel } = latest.current
                     onChangeWithHistory({
                       ...funnel,
                       nodes: funnel.nodes.map((node) =>
@@ -1444,11 +1530,9 @@ export default function CanvasBoard({
                           : node,
                       ),
                     })
-                  }
+                  }}
                   onEdgeDragStart={handleEdgeDragStart}
-                  onDropResource={(type, id) =>
-                    handleDropResource(n.id, type, id)
-                  }
+                  onDropResource={handleDropResource}
                 />
               )
             })}
