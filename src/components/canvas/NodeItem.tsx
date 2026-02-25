@@ -56,6 +56,7 @@ type Metric = { label: string; value: string }
 type NodeItemProps = {
   node: Node
   selected: boolean
+  isNodeDragging: boolean
   snapToGrid?: boolean
   activeTool: string
   taskProgress: { total: number; completed: number }
@@ -78,6 +79,7 @@ type NodeItemProps = {
 export default function NodeItem({
   node,
   selected,
+  isNodeDragging,
   snapToGrid,
   activeTool,
   taskProgress,
@@ -131,6 +133,7 @@ export default function NodeItem({
 
   const isPanMode = activeTool === 'Pan'
   const isSelectMode = activeTool === 'Select'
+  const currentlyDragging = isDragging || isNodeDragging
 
   useEffect(() => {
     if (
@@ -367,8 +370,9 @@ export default function NodeItem({
         className={cn(
           'absolute top-0 left-0 pointer-events-auto min-w-[50px] p-2 z-10 group outline-none',
           selected && 'ring-2 ring-[#C2714F]/60 shadow-lg rounded-md',
-          isDragging
-            ? 'opacity-95 scale-[1.02] z-50 cursor-grabbing shadow-xl ring-2 ring-[#C2714F]/30 rounded-md'
+          !currentlyDragging && 'transition-transform duration-150',
+          currentlyDragging
+            ? 'opacity-95 z-50 cursor-grabbing shadow-xl ring-2 ring-[#C2714F]/30 rounded-md'
             : isPanMode
               ? 'cursor-grab'
               : isSelectMode
@@ -378,11 +382,9 @@ export default function NodeItem({
                 : '',
         )}
         style={{
-          transform: `translate3d(${node.x}px, ${node.y}px, 0)`,
+          transform: `translate3d(${node.x}px, ${node.y}px, 0) scale(${currentlyDragging ? 1.02 : 1})`,
           color: node.style?.color || '#3D2B1F',
-          transition: isDragging
-            ? 'none'
-            : 'transform 0.15s cubic-bezier(0.2, 0, 0, 1)',
+          transformOrigin: 'center center',
         }}
         onPointerDown={(e) => {
           if (isEditingText) {
@@ -438,8 +440,10 @@ export default function NodeItem({
         className={cn(
           'absolute top-0 left-0 pointer-events-auto flex items-center justify-center z-10 group text-[#3D2B1F]',
           selected && 'shadow-md',
-          isDragging || isResizing
-            ? 'opacity-95 z-50 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] cursor-grabbing scale-[1.02]'
+          !(currentlyDragging || isResizing) &&
+            'transition-transform duration-150',
+          currentlyDragging || isResizing
+            ? 'opacity-95 z-50 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] cursor-grabbing'
             : isPanMode
               ? 'cursor-grab'
               : isSelectMode
@@ -447,13 +451,10 @@ export default function NodeItem({
                 : '',
         )}
         style={{
-          transform: `translate3d(${node.x}px, ${node.y}px, 0)`,
+          transform: `translate3d(${node.x}px, ${node.y}px, 0) scale(${currentlyDragging || isResizing ? 1.02 : 1})`,
           width: w,
           height: h,
-          transition:
-            isDragging || isResizing
-              ? 'none'
-              : 'transform 0.15s cubic-bezier(0.2, 0, 0, 1), width 0.15s, height 0.15s',
+          transformOrigin: 'center center',
         }}
         onPointerDown={handlePointerDown}
         onMouseEnter={() => setIsHovered(true)}
@@ -570,8 +571,9 @@ export default function NodeItem({
         className={cn(
           'absolute top-0 left-0 pointer-events-auto min-w-[150px] max-w-[400px] p-4 bg-[#FAF7F2] rounded-xl shadow-sm border border-[#E8E2D9] text-[#3D2B1F] z-10 group',
           selected && 'ring-2 ring-[#C2714F]/60 shadow-md',
-          isDragging
-            ? 'opacity-95 scale-[1.02] z-50 cursor-grabbing shadow-xl ring-2 ring-[#C2714F]/50'
+          !currentlyDragging && 'transition-transform duration-150',
+          currentlyDragging
+            ? 'opacity-95 z-50 cursor-grabbing shadow-xl ring-2 ring-[#C2714F]/50'
             : isPanMode
               ? 'cursor-grab'
               : isSelectMode
@@ -581,10 +583,8 @@ export default function NodeItem({
                 : '',
         )}
         style={{
-          transform: `translate3d(${node.x}px, ${node.y}px, 0)`,
-          transition: isDragging
-            ? 'none'
-            : 'transform 0.15s cubic-bezier(0.2, 0, 0, 1)',
+          transform: `translate3d(${node.x}px, ${node.y}px, 0) scale(${currentlyDragging ? 1.02 : 1})`,
+          transformOrigin: 'center center',
         }}
         onPointerDown={(e) => {
           if (isEditingText) {
@@ -626,8 +626,9 @@ export default function NodeItem({
         className={cn(
           'absolute top-0 left-0 pointer-events-auto w-[300px] rounded-2xl shadow-sm border border-[#E8E2D9] bg-white z-10 overflow-hidden group',
           selected && 'ring-4 ring-[#C2714F]/40 border-[#C2714F] shadow-md',
-          isDragging
-            ? 'opacity-95 scale-[1.02] z-50 cursor-grabbing shadow-xl ring-4 ring-[#C2714F]/50'
+          !currentlyDragging && 'transition-transform duration-150',
+          currentlyDragging
+            ? 'opacity-95 z-50 cursor-grabbing shadow-xl ring-4 ring-[#C2714F]/50'
             : isPanMode
               ? 'cursor-grab'
               : isSelectMode
@@ -635,10 +636,8 @@ export default function NodeItem({
                 : '',
         )}
         style={{
-          transform: `translate3d(${node.x}px, ${node.y}px, 0)`,
-          transition: isDragging
-            ? 'none'
-            : 'transform 0.15s cubic-bezier(0.2, 0, 0, 1)',
+          transform: `translate3d(${node.x}px, ${node.y}px, 0) scale(${currentlyDragging ? 1.02 : 1})`,
+          transformOrigin: 'center center',
         }}
         onPointerDown={handlePointerDown}
         onDoubleClick={(e) => {
@@ -671,23 +670,27 @@ export default function NodeItem({
   return (
     <div
       className={cn(
-        'absolute top-0 left-0 pointer-events-auto w-[280px] rounded-[1.25rem] p-5 z-10 flex flex-col gap-3 group select-none transition-all duration-200',
+        'absolute top-0 left-0 pointer-events-auto w-[280px] rounded-[1.25rem] p-5 z-10 flex flex-col gap-3 group select-none duration-200',
+        !currentlyDragging
+          ? 'transition-[box-shadow,background-color,border-color,opacity,transform]'
+          : 'transition-[box-shadow,background-color,border-color,opacity]',
         isTraffic && 'bg-[#3D2B1F] border border-[#3D2B1F] shadow-lg',
         isFeatured && 'bg-white border-2 border-[#C2714F] shadow-2xl',
         isStandard && 'bg-white border border-[#E8E2D9] shadow-sm',
         isHovered && !selected && !isFeatured && 'shadow-md',
         selected && 'ring-4 ring-[#C2714F]/20 border-[#C2714F] shadow-xl',
-        isDragging && 'opacity-95 scale-[1.03] z-50 shadow-2xl',
+        currentlyDragging && 'opacity-95 z-50 shadow-2xl',
       )}
       style={{
-        transform: `translate3d(${node.x}px, ${node.y}px, 0)`,
+        transform: `translate3d(${node.x}px, ${node.y}px, 0) scale(${currentlyDragging ? 1.03 : 1})`,
         cursor: isPanMode
           ? 'grab'
-          : isDragging
+          : currentlyDragging
             ? 'grabbing'
             : isSelectMode
               ? 'pointer'
               : '',
+        transformOrigin: 'center center',
       }}
       onPointerDown={handlePointerDown}
       onDoubleClick={(e) => {

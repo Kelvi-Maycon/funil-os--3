@@ -146,6 +146,7 @@ const MemoizedNodeItem = memo(NodeItem, (prev, next) => {
     prev.selected === next.selected &&
     prev.snapToGrid === next.snapToGrid &&
     prev.activeTool === next.activeTool &&
+    prev.isNodeDragging === next.isNodeDragging &&
     prev.taskProgress.total === next.taskProgress.total &&
     prev.taskProgress.completed === next.taskProgress.completed &&
     prev.scale === next.scale
@@ -909,25 +910,25 @@ export default function CanvasBoard({
       : undefined
   const selectedEdgeObj = funnel.edges.find((e) => e.id === selectedEdge)
 
-  const getEffectiveNode = useCallback(
-    (n: Node | undefined) => {
-      if (!n) return undefined
+  const effectiveNodesMap = useMemo(() => {
+    const map = new Map<string, Node>()
+    funnel.nodes.forEach((n) => {
+      let eff = n
       if (resizingNode?.id === n.id) {
-        return {
+        eff = {
           ...n,
           x: resizingNode.x,
           y: resizingNode.y,
           width: resizingNode.width,
           height: resizingNode.height,
         }
+      } else if (selectedNodes.includes(n.id) && dragState) {
+        eff = { ...n, x: n.x + dragState.dx, y: n.y + dragState.dy }
       }
-      if (selectedNodes.includes(n.id) && dragState) {
-        return { ...n, x: n.x + dragState.dx, y: n.y + dragState.dy }
-      }
-      return n
-    },
-    [resizingNode, selectedNodes, dragState],
-  )
+      map.set(n.id, eff)
+    })
+    return map
+  }, [funnel.nodes, resizingNode, selectedNodes, dragState])
 
   const minimapNodes = useMemo(() => {
     return funnel.nodes.map((n) => (
@@ -1365,12 +1366,8 @@ export default function CanvasBoard({
               </linearGradient>
             </defs>
             {funnel.edges.map((e) => {
-              const sourceNode = getEffectiveNode(
-                funnel.nodes.find((n) => n.id === e.source),
-              )
-              const targetNode = getEffectiveNode(
-                funnel.nodes.find((n) => n.id === e.target),
-              )
+              const sourceNode = effectiveNodesMap.get(e.source)
+              const targetNode = effectiveNodesMap.get(e.target)
               if (!sourceNode || !targetNode) return null
               const isSelected = selectedEdge === e.id
 
@@ -1448,12 +1445,14 @@ export default function CanvasBoard({
                 }
               })
               const taskProgress = { total, completed }
+              const isNodeDragging = !!dragState && selectedNodes.includes(n.id)
 
               return (
                 <MemoizedNodeItem
                   key={n.id}
-                  node={getEffectiveNode(n)!}
+                  node={effectiveNodesMap.get(n.id)!}
                   selected={selectedNodes.includes(n.id)}
+                  isNodeDragging={isNodeDragging}
                   snapToGrid={snapToGrid}
                   activeTool={activeTool}
                   taskProgress={taskProgress}
