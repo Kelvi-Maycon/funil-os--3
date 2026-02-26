@@ -53,32 +53,36 @@ function AppSidebar() {
         className={cn(
           'shrink-0 transition-all duration-200 ease-in-out border-b border-[#E8E2D9]',
           'flex flex-row items-center justify-between p-4 px-6 h-20',
-          'group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:gap-3 group-data-[collapsible=icon]:py-3 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:h-auto group-data-[collapsible=icon]:justify-start',
+          'group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:gap-3 group-data-[collapsible=icon]:py-4 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:h-auto',
         )}
       >
-        <div className="flex items-center overflow-hidden transition-all duration-200 group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0">
-          <div className="w-8 h-8 bg-[#C2714F] rounded-lg flex items-center justify-center text-white shrink-0 shadow-md mr-3">
-            <Folder size={18} className="fill-white" />
+        {/* Expanded View */}
+        <div className="flex items-center w-full justify-between group-data-[collapsible=icon]:hidden">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-[#C2714F] rounded-lg flex items-center justify-center text-white shrink-0 shadow-md">
+              <Folder size={18} className="fill-white" />
+            </div>
+            <span className="font-bold text-lg text-[#3D2B1F] truncate whitespace-nowrap">
+              Funil OS
+            </span>
           </div>
-          <span className="font-bold text-lg text-[#3D2B1F] truncate whitespace-nowrap">
-            Funil OS
-          </span>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setQuickAction({ mode: 'create', type: 'task' })}
+              className="w-8 h-8 bg-[#F3EEE7] hover:bg-[#E8E2D9] text-[#C2714F] rounded-lg flex items-center justify-center shrink-0 transition-colors outline-none"
+            >
+              <Plus size={18} />
+            </button>
+            <div className="text-[#8C7B6C] shrink-0">
+              <PanelLeft size={20} />
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2 overflow-hidden transition-all duration-200 group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0">
-          <button
-            onClick={() => setQuickAction({ mode: 'create', type: 'task' })}
-            className="w-8 h-8 bg-[#F3EEE7] hover:bg-[#E8E2D9] text-[#C2714F] rounded-lg flex items-center justify-center shrink-0 transition-colors outline-none"
-          >
-            <Plus size={18} />
-          </button>
-          <div className="text-[#8C7B6C] shrink-0">
-            <PanelLeft size={20} />
-          </div>
-        </div>
-
+        {/* Collapsed View */}
         <div className="hidden group-data-[collapsible=icon]:flex flex-col items-center gap-3 w-full">
-          <div className="text-[#8C7B6C] shrink-0">
+          <div className="text-[#8C7B6C] shrink-0 flex items-center justify-center w-8 h-8">
             <PanelLeft size={20} />
           </div>
           <button
@@ -93,9 +97,9 @@ function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-3 py-6 flex flex-col gap-2 overflow-y-auto overflow-x-hidden no-scrollbar">
-        <SidebarGroup>
-          <SidebarMenu className="gap-2">
+      <SidebarContent className="px-3 py-6 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-3 flex flex-col gap-2 overflow-y-auto overflow-x-hidden no-scrollbar group-data-[collapsible=icon]:items-center">
+        <SidebarGroup className="group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:w-auto">
+          <SidebarMenu className="gap-2 group-data-[collapsible=icon]:items-center">
             {navItems.map((item) => {
               const isActive =
                 location.pathname === item.url ||
@@ -117,9 +121,9 @@ function AppSidebar() {
                       <item.icon
                         size={20}
                         strokeWidth={isActive ? 2.5 : 2}
-                        className="shrink-0"
+                        className="shrink-0 group-data-[collapsible=icon]:mx-auto"
                       />
-                      <span className="truncate whitespace-nowrap overflow-hidden transition-all duration-200 group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0">
+                      <span className="truncate whitespace-nowrap overflow-hidden transition-all duration-200 group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:hidden">
                         {item.title}
                       </span>
                     </Link>
@@ -131,15 +135,15 @@ function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 group-data-[collapsible=icon]:p-2 shrink-0 transition-all duration-200 border-t border-[#E8E2D9]">
-        <div className="flex items-center w-full justify-between group-data-[collapsible=icon]:justify-center">
-          <div className="flex items-center">
+      <SidebarFooter className="p-4 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:py-3 shrink-0 transition-all duration-200 border-t border-[#E8E2D9]">
+        <div className="flex items-center w-full justify-between group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-3">
+          <div className="flex items-center group-data-[collapsible=icon]:justify-center w-full">
             <img
               src="https://img.usecurling.com/ppl/thumbnail?gender=male&seed=8"
               alt="Avatar"
               className="w-10 h-10 rounded-full border border-[#E8E2D9] shrink-0 mr-3 group-data-[collapsible=icon]:mr-0 shadow-sm"
             />
-            <div className="flex flex-col overflow-hidden transition-all duration-200 group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0">
+            <div className="flex flex-col overflow-hidden transition-all duration-200 group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:hidden">
               <span className="text-sm font-bold text-[#3D2B1F] truncate whitespace-nowrap">
                 Diego K.
               </span>
@@ -148,7 +152,7 @@ function AppSidebar() {
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-1 overflow-hidden transition-all duration-200 group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 text-[#8C7B6C] hover:text-[#C2714F]">
+          <div className="flex items-center gap-1 overflow-hidden transition-all duration-200 text-[#8C7B6C] hover:text-[#C2714F] group-data-[collapsible=icon]:justify-center w-full">
             <DataManager />
           </div>
         </div>
