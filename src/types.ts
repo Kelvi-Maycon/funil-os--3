@@ -19,6 +19,7 @@ export type NodeData = {
   linkedDocumentIds?: string[]
   linkedAssetIds?: string[]
   linkedTaskIds?: string[]
+  color?: string
 }
 export type Node = {
   id: string
@@ -84,7 +85,7 @@ export type Task = {
   nodeId?: string
   blockId?: string
   priority: 'Baixa' | 'Média' | 'Alta'
-  status: 'Pendente' | 'Em Progresso' | 'Concluída'
+  status: 'Pendente' | 'Em Progresso' | 'Concluída' | 'A Fazer' | 'Concluído'
   deadline?: string
   description?: string
   assignee?: string

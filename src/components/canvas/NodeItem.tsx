@@ -117,7 +117,6 @@ export default function NodeItem({
     onResize,
     onResizeEnd,
   })
-
   callbacksRef.current = {
     onPointerDownAction,
     onMove,
@@ -159,16 +158,11 @@ export default function NodeItem({
     )
   }
 
-  const handleDeleteTask = (taskId: string) => {
-    setTasks(tasks.filter((t) => t.id !== taskId))
-  }
-
   const handleAddTask = () => {
     if (!newTaskTitle.trim()) {
       setIsAddingTask(false)
       return
     }
-
     const newTask: Task = {
       id: generateId('t'),
       title: newTaskTitle.trim(),
@@ -179,7 +173,6 @@ export default function NodeItem({
       status: 'A Fazer',
       deadline: new Date(Date.now() + 86400000).toISOString(),
     }
-
     setTasks([...tasks, newTask])
     setNewTaskTitle('')
     setIsAddingTask(false)
@@ -204,36 +197,32 @@ export default function NodeItem({
     callbacksRef.current.onPointerDownAction(e.shiftKey)
     document.body.style.userSelect = 'none'
 
-    const startX = e.clientX
-    const startY = e.clientY
-    const initialNodeX = node.x
-    const initialNodeY = node.y
-
+    const startX = e.clientX,
+      startY = e.clientY,
+      initialNodeX = node.x,
+      initialNodeY = node.y
     const handlePointerMove = (moveEv: PointerEvent) => {
-      let dx = (moveEv.clientX - startX) / scale
-      let dy = (moveEv.clientY - startY) / scale
+      let dx = (moveEv.clientX - startX) / scale,
+        dy = (moveEv.clientY - startY) / scale
       if (snapToGrid) {
-        const snappedX = Math.round((initialNodeX + dx) / 28) * 28
-        const snappedY = Math.round((initialNodeY + dy) / 28) * 28
+        const snappedX = Math.round((initialNodeX + dx) / 28) * 28,
+          snappedY = Math.round((initialNodeY + dy) / 28) * 28
         dx = snappedX - initialNodeX
         dy = snappedY - initialNodeY
       }
       callbacksRef.current.onMove(dx, dy)
     }
-
     const handlePointerUp = (upEv: PointerEvent) => {
       try {
         target.releasePointerCapture(upEv.pointerId)
-      } catch (err) {
-        // ignore
-      }
+      } catch (err) {}
       setIsDragging(false)
       document.body.style.userSelect = ''
-      let dx = (upEv.clientX - startX) / scale
-      let dy = (upEv.clientY - startY) / scale
+      let dx = (upEv.clientX - startX) / scale,
+        dy = (upEv.clientY - startY) / scale
       if (snapToGrid) {
-        const snappedX = Math.round((initialNodeX + dx) / 28) * 28
-        const snappedY = Math.round((initialNodeY + dy) / 28) * 28
+        const snappedX = Math.round((initialNodeX + dx) / 28) * 28,
+          snappedY = Math.round((initialNodeY + dy) / 28) * 28
         dx = snappedX - initialNodeX
         dy = snappedY - initialNodeY
       }
@@ -256,22 +245,21 @@ export default function NodeItem({
     callbacksRef.current.onPointerDownAction(e.shiftKey)
     document.body.style.userSelect = 'none'
 
-    const startX = e.clientX
-    const startY = e.clientY
-    const initialX = node.x
-    const initialY = node.y
-    const initialW = node.width || 120
-    const initialH = node.height || 120
+    const startX = e.clientX,
+      startY = e.clientY,
+      initialX = node.x,
+      initialY = node.y,
+      initialW = node.width || 120,
+      initialH = node.height || 120
     const isSquare = e.shiftKey
 
     const handlePointerMove = (moveEv: PointerEvent) => {
-      let dx = (moveEv.clientX - startX) / scale
-      let dy = (moveEv.clientY - startY) / scale
-
-      let newX = initialX
-      let newY = initialY
-      let newW = initialW
-      let newH = initialH
+      let dx = (moveEv.clientX - startX) / scale,
+        dy = (moveEv.clientY - startY) / scale
+      let newX = initialX,
+        newY = initialY,
+        newW = initialW,
+        newH = initialH
 
       if (corner.includes('e')) newW = Math.max(20, initialW + dx)
       if (corner.includes('s')) newH = Math.max(20, initialH + dy)
@@ -291,33 +279,28 @@ export default function NodeItem({
         newW = size
         newH = size
       }
-
       if (snapToGrid) {
         newX = Math.round(newX / 28) * 28
         newY = Math.round(newY / 28) * 28
         newW = Math.round(newW / 28) * 28
         newH = Math.round(newH / 28) * 28
       }
-
       callbacksRef.current.onResize?.(newX, newY, newW, newH)
     }
 
     const handlePointerUp = (upEv: PointerEvent) => {
       try {
         target.releasePointerCapture(upEv.pointerId)
-      } catch (err) {
-        // ignore
-      }
+      } catch (err) {}
       setIsResizing(false)
       document.body.style.userSelect = ''
 
-      let dx = (upEv.clientX - startX) / scale
-      let dy = (upEv.clientY - startY) / scale
-
-      let newX = initialX
-      let newY = initialY
-      let newW = initialW
-      let newH = initialH
+      let dx = (upEv.clientX - startX) / scale,
+        dy = (upEv.clientY - startY) / scale
+      let newX = initialX,
+        newY = initialY,
+        newW = initialW,
+        newH = initialH
 
       if (corner.includes('e')) newW = Math.max(20, initialW + dx)
       if (corner.includes('s')) newH = Math.max(20, initialH + dy)
@@ -337,7 +320,6 @@ export default function NodeItem({
         newW = size
         newH = size
       }
-
       if (snapToGrid) {
         newX = Math.round(newX / 28) * 28
         newY = Math.round(newY / 28) * 28
@@ -357,11 +339,9 @@ export default function NodeItem({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    const resType = e.dataTransfer.getData('resourceType')
-    const resId = e.dataTransfer.getData('resourceId')
-    if (resType && resId) {
-      onDropResource(resType, resId)
-    }
+    const resType = e.dataTransfer.getData('resourceType'),
+      resId = e.dataTransfer.getData('resourceId')
+    if (resType && resId) onDropResource(resType, resId)
   }
 
   if (node.type === 'FloatingText') {
@@ -421,8 +401,7 @@ export default function NodeItem({
           }}
           onBlur={(e) => {
             setIsEditingText(false)
-            const val = e.currentTarget.textContent || 'Text'
-            onTextChange(val)
+            onTextChange(e.currentTarget.textContent || 'Text')
           }}
         >
           {node.data.name}
@@ -432,9 +411,8 @@ export default function NodeItem({
   }
 
   if (['Square', 'Diamond', 'Circle'].includes(node.type)) {
-    const w = node.width || 120
-    const h = node.height || 120
-
+    const w = node.width || 120,
+      h = node.height || 120
     return (
       <div
         className={cn(
@@ -531,7 +509,6 @@ export default function NodeItem({
             />
           )}
         </svg>
-
         {selected && !isPanMode && isSelectMode && (
           <>
             <div className="absolute top-0 left-0 w-full h-full border border-[#C2714F]/50 pointer-events-none" />
@@ -659,13 +636,8 @@ export default function NodeItem({
   const isTraffic = ['Ad', 'Traffic', 'Goal', 'Email'].includes(node.type)
   const isFeatured = ['VSL', 'Webinar'].includes(node.type)
   const isStandard = !isTraffic && !isFeatured
-
+  const customColor = node.data.color
   const Icon = icons[node.type] || icons.Default
-  const circumference = 2 * Math.PI * 6
-  const progressPercent =
-    taskProgress.total > 0 ? taskProgress.completed / taskProgress.total : 0
-  const strokeDashoffset = circumference - progressPercent * circumference
-  const showTaskIcon = taskProgress.total > 0 || node.data.isTaskMode
 
   return (
     <div
@@ -674,12 +646,20 @@ export default function NodeItem({
         !currentlyDragging
           ? 'transition-[box-shadow,background-color,border-color,opacity,transform]'
           : 'transition-[box-shadow,background-color,border-color,opacity]',
-        isTraffic && 'bg-[#3D2B1F] border border-[#3D2B1F] shadow-lg',
-        isFeatured && 'bg-white border-2 border-[#C2714F] shadow-2xl',
-        isStandard && 'bg-white border border-[#E8E2D9] shadow-sm',
-        isHovered && !selected && !isFeatured && 'shadow-md',
+        !customColor &&
+          isTraffic &&
+          'bg-[#3D2B1F] border border-[#3D2B1F] shadow-lg',
+        !customColor &&
+          isFeatured &&
+          'bg-white border-2 border-[#C2714F] shadow-2xl',
+        !customColor &&
+          isStandard &&
+          'bg-white border border-[#E8E2D9] shadow-sm',
+        customColor && 'bg-white border shadow-md',
+        isHovered && !selected && !isFeatured && !customColor && 'shadow-md',
         selected && 'ring-4 ring-[#C2714F]/20 border-[#C2714F] shadow-xl',
         currentlyDragging && 'opacity-95 z-50 shadow-2xl',
+        node.data.isCompleted && 'opacity-70 grayscale-[30%]',
       )}
       style={{
         transform: `translate3d(${node.x}px, ${node.y}px, 0) scale(${currentlyDragging ? 1.03 : 1})`,
@@ -691,6 +671,8 @@ export default function NodeItem({
               ? 'pointer'
               : '',
         transformOrigin: 'center center',
+        borderColor: customColor && !selected ? customColor : undefined,
+        borderWidth: customColor && !selected ? '2px' : undefined,
       }}
       onPointerDown={handlePointerDown}
       onDoubleClick={(e) => {
@@ -749,20 +731,28 @@ export default function NodeItem({
       </div>
 
       <div className="flex items-center gap-3">
-        {isTraffic ? (
-          <div className="w-10 h-10 rounded-xl bg-[#C2714F] flex items-center justify-center text-white shrink-0 shadow-sm">
-            <Icon size={20} strokeWidth={2} />
-          </div>
-        ) : (
-          <div className="w-10 h-10 rounded-xl bg-[#FAF7F2] flex items-center justify-center text-[#C2714F] shrink-0 border border-[#E8E2D9]">
-            <Icon size={20} strokeWidth={2} />
-          </div>
-        )}
+        <div
+          className={cn(
+            'w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm',
+            !customColor &&
+              (isTraffic
+                ? 'bg-[#C2714F] text-white'
+                : 'bg-[#FAF7F2] text-[#C2714F] border border-[#E8E2D9]'),
+          )}
+          style={
+            customColor
+              ? { backgroundColor: customColor, color: '#fff' }
+              : undefined
+          }
+        >
+          <Icon size={20} strokeWidth={2} />
+        </div>
         <div className="flex flex-col min-w-0 flex-1">
           <h4
             className={cn(
-              'font-bold text-[15px] truncate leading-tight',
-              isTraffic ? 'text-white' : 'text-[#3D2B1F]',
+              'font-bold text-[15px] truncate leading-tight transition-all',
+              isTraffic && !customColor ? 'text-white' : 'text-[#3D2B1F]',
+              node.data.isCompleted && 'line-through opacity-70',
             )}
           >
             {node.data.name}
@@ -770,7 +760,7 @@ export default function NodeItem({
           <span
             className={cn(
               'text-[12px] mt-0.5 truncate font-medium',
-              isTraffic ? 'text-white/70' : 'text-[#8C7B6C]',
+              isTraffic && !customColor ? 'text-white/70' : 'text-[#8C7B6C]',
             )}
           >
             {node.data.subtitle || node.type}
@@ -782,7 +772,7 @@ export default function NodeItem({
         <div
           className={cn(
             'flex flex-wrap items-center gap-4 mt-2 pt-3 border-t',
-            isTraffic ? 'border-white/10' : 'border-[#E8E2D9]',
+            isTraffic && !customColor ? 'border-white/10' : 'border-[#E8E2D9]',
           )}
         >
           {(node.data.metrics as Metric[]).map((m: any, i: number) => (
@@ -790,7 +780,9 @@ export default function NodeItem({
               <span
                 className={cn(
                   'text-[10px] font-bold uppercase tracking-wider',
-                  isTraffic ? 'text-white/50' : 'text-[#8C7B6C]',
+                  isTraffic && !customColor
+                    ? 'text-white/50'
+                    : 'text-[#8C7B6C]',
                 )}
               >
                 {m.label}
@@ -798,7 +790,7 @@ export default function NodeItem({
               <span
                 className={cn(
                   'text-[13px] font-bold',
-                  isTraffic ? 'text-white' : 'text-[#3D2B1F]',
+                  isTraffic && !customColor ? 'text-white' : 'text-[#3D2B1F]',
                 )}
               >
                 {m.value}
@@ -833,7 +825,7 @@ export default function NodeItem({
             <div
               className={cn(
                 'h-px w-full my-1 rounded-full',
-                isTraffic ? 'bg-white/10' : 'bg-[#E8E2D9]',
+                isTraffic && !customColor ? 'bg-white/10' : 'bg-[#E8E2D9]',
               )}
             />
           )}
@@ -847,7 +839,7 @@ export default function NodeItem({
                 onCheckedChange={() => handleToggleTask(task)}
                 className={cn(
                   'mt-0.5 w-3.5 h-3.5 rounded-[4px] border',
-                  isTraffic
+                  isTraffic && !customColor
                     ? 'border-white/30 data-[state=checked]:bg-white data-[state=checked]:text-[#3D2B1F]'
                     : 'border-[#E8E2D9] data-[state=checked]:bg-[#C2714F] data-[state=checked]:border-[#C2714F]',
                 )}
@@ -856,10 +848,10 @@ export default function NodeItem({
                 className={cn(
                   'text-[12px] leading-tight font-bold flex-1 transition-all break-words',
                   task.status === 'Concluído'
-                    ? isTraffic
+                    ? isTraffic && !customColor
                       ? 'text-white/40 line-through'
                       : 'text-[#8C7B6C] line-through'
-                    : isTraffic
+                    : isTraffic && !customColor
                       ? 'text-white'
                       : 'text-[#3D2B1F]',
                 )}
@@ -891,7 +883,7 @@ export default function NodeItem({
                 placeholder="Nome da tarefa..."
                 className={cn(
                   'flex-1 text-[12px] border rounded px-2 py-1 outline-none transition-all w-full font-bold',
-                  isTraffic
+                  isTraffic && !customColor
                     ? 'bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-white/50'
                     : 'bg-[#FAF7F2] border-[#E8E2D9] text-[#3D2B1F] placeholder:text-[#8C7B6C] focus:border-[#C2714F]',
                 )}
@@ -905,7 +897,7 @@ export default function NodeItem({
               }}
               className={cn(
                 'flex items-center gap-1.5 mt-1 text-[12px] font-bold transition-colors w-full text-left py-0.5 rounded-sm interactive-icon',
-                isTraffic
+                isTraffic && !customColor
                   ? 'text-white/50 hover:text-white'
                   : 'text-[#8C7B6C] hover:text-[#C2714F]',
               )}
