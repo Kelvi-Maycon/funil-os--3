@@ -34,7 +34,7 @@ export default function Documents() {
   const [activeId, setActiveId] = useState(docs[0]?.id)
   const [newFolderOpen, setNewFolderOpen] = useState(false)
   const [newFolderName, setNewFolderName] = useState('')
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [search, setSearch] = useState('')
 
   const activeDoc = docs.find((d) => d.id === activeId)
@@ -186,15 +186,17 @@ export default function Documents() {
   return (
     <div className="flex h-full bg-background overflow-hidden animate-fade-in">
       <div
+        onMouseEnter={() => setIsSidebarOpen(true)}
+        onMouseLeave={() => setIsSidebarOpen(false)}
         className={cn(
-          'border-r border-border bg-card flex flex-col shrink-0 z-10 shadow-sm transition-all duration-300',
-          isSidebarOpen ? 'w-72' : 'w-[60px]',
+          'border-r border-border bg-card flex flex-col shrink-0 z-10 shadow-sm transition-all duration-200 ease-in-out',
+          isSidebarOpen ? 'w-72' : 'w-[56px]',
         )}
       >
         <div
           className={cn(
-            'p-4 border-b border-border flex flex-col gap-3',
-            !isSidebarOpen && 'items-center px-2',
+            'border-b border-border flex flex-col gap-3',
+            isSidebarOpen ? 'p-4' : 'py-3 px-0 items-center',
           )}
         >
           <div
@@ -211,11 +213,7 @@ export default function Documents() {
             <Button
               variant="ghost"
               size="icon"
-              className={cn(
-                'h-8 w-8 text-muted-foreground hover:text-foreground shrink-0 rounded-lg hover:bg-slate-200/50',
-                !isSidebarOpen && 'mb-2',
-              )}
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0 rounded-lg hover:bg-slate-200/50"
               title={isSidebarOpen ? 'Ocultar pastas' : 'Mostrar pastas'}
             >
               {isSidebarOpen ? (
@@ -275,7 +273,7 @@ export default function Documents() {
         </div>
 
         {isSidebarOpen && (
-          <div className="px-3 pb-1">
+          <div className="px-3 pb-1 pt-3">
             <div className="relative">
               <Search
                 className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
