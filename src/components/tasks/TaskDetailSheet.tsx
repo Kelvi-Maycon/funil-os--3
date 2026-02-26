@@ -98,12 +98,12 @@ export default function TaskDetailSheet({
               onClick={() =>
                 handleUpdate({
                   status:
-                    localTask.status === 'Concluído' ? 'A Fazer' : 'Concluído',
+                    localTask.status === 'Concluída' ? 'Pendente' : 'Concluída',
                 })
               }
               className={cn(
                 'w-7 h-7 rounded-full border flex items-center justify-center transition-colors shrink-0',
-                localTask.status === 'Concluído'
+                localTask.status === 'Concluída'
                   ? 'bg-[#4CAF50] border-[#4CAF50] text-white'
                   : 'border-[#E8E2D9] text-transparent hover:border-[#C2714F] hover:text-[#C2714F]/50',
               )}

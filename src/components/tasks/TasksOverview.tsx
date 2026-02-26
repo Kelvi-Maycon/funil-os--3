@@ -77,10 +77,11 @@ const recentActivities = [
 export default function TasksOverview({ tasks }: { tasks: Task[] }) {
   const total = tasks.length
   const inProgress = tasks.filter((t) => t.status === 'Em Progresso').length
-  const completed = tasks.filter((t) => t.status === 'Concluído').length
+  const completed = tasks.filter((t) => t.status === 'Concluída').length
   const overdue = tasks.filter(
     (t) =>
-      t.status !== 'Concluído' &&
+      t.status !== 'Concluída' &&
+      t.deadline &&
       isPast(new Date(t.deadline)) &&
       !isToday(new Date(t.deadline)),
   ).length
@@ -99,9 +100,10 @@ export default function TasksOverview({ tasks }: { tasks: Task[] }) {
   }))
 
   const upcomingTasks = tasks
-    .filter((t) => t.status !== 'Concluído')
+    .filter((t) => t.status !== 'Concluída' && t.deadline)
     .sort(
-      (a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime(),
+      (a, b) =>
+        new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime(),
     )
     .slice(0, 5)
 
@@ -218,7 +220,9 @@ export default function TasksOverview({ tasks }: { tasks: Task[] }) {
                       {t.title}
                     </span>
                     <span className="text-sm text-muted-foreground">
-                      {format(new Date(t.deadline), 'MMM dd, yyyy')}
+                      {t.deadline
+                        ? format(new Date(t.deadline), 'MMM dd, yyyy')
+                        : ''}
                     </span>
                   </div>
                   <Badge

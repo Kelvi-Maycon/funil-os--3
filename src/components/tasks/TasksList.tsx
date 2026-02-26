@@ -14,7 +14,7 @@ import { format } from 'date-fns'
 import { ArrowUpDown, Network } from 'lucide-react'
 
 const statusConfig = {
-  'A Fazer': {
+  Pendente: {
     label: 'Todo',
     color: 'bg-slate-100 text-slate-600 border-transparent hover:bg-slate-200',
   },
@@ -22,11 +22,7 @@ const statusConfig = {
     label: 'In Progress',
     color: 'bg-amber-100 text-amber-700 border-transparent hover:bg-amber-200',
   },
-  'Em Revisão': {
-    label: 'In Review',
-    color: 'bg-blue-100 text-blue-700 border-transparent hover:bg-blue-200',
-  },
-  Concluído: {
+  Concluída: {
     label: 'Done',
     color: 'bg-green-100 text-green-700 border-transparent hover:bg-green-200',
   },
@@ -86,7 +82,10 @@ export default function TasksList({
         </TableHeader>
         <TableBody>
           {tasks.map((t) => {
-            const sc = statusConfig[t.status]
+            const sc = statusConfig[t.status as keyof typeof statusConfig] || {
+              label: t.status,
+              color: 'bg-gray-100 text-gray-700',
+            }
             const pc = priorityConfig[t.priority]
             return (
               <TableRow
@@ -100,11 +99,12 @@ export default function TasksList({
                     variant="outline"
                     className="font-normal text-teal-600 border-teal-200 bg-teal-50"
                   >
-                    {t.projectId === 'p1'
-                      ? 'Backend API'
-                      : t.projectId === 'p2'
-                        ? 'Marketing'
-                        : 'NovaBoard App'}
+                    {t.category ||
+                      (t.projectId === 'p1'
+                        ? 'Backend API'
+                        : t.projectId === 'p2'
+                          ? 'Marketing'
+                          : 'NovaBoard App')}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -115,7 +115,7 @@ export default function TasksList({
                 <TableCell className="text-muted-foreground">
                   {t.deadline
                     ? format(new Date(t.deadline), 'MMM dd, yyyy')
-                    : '-'}
+                    : t.dateLabel || '-'}
                 </TableCell>
                 <TableCell className="text-right">
                   <Badge variant="outline" className={sc.color}>

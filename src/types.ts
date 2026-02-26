@@ -84,11 +84,18 @@ export type Task = {
   nodeId?: string
   blockId?: string
   priority: 'Baixa' | 'Média' | 'Alta'
-  status: 'A Fazer' | 'Em Progresso' | 'Em Revisão' | 'Concluído'
-  deadline: string
+  status: 'Pendente' | 'Em Progresso' | 'Concluída'
+  deadline?: string
   description?: string
   assignee?: string
   avatar?: string
+  category?: string
+  categoryColor?: string
+  dateLabel?: string
+  dateColor?: string
+  iconType?: 'clock' | 'alert' | 'dot' | 'comment' | 'check'
+  progress?: number
+  assignees?: { initials: string; color: string }[]
   subtasks?: Subtask[]
   comments?: Comment[]
   attachmentCount?: number

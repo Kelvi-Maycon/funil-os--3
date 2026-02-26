@@ -1,47 +1,39 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { Task } from '@/types'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import { cn } from '@/lib/utils'
 import {
   MoreHorizontal,
-  Paperclip,
-  MessageSquare,
   Plus,
-  Network,
+  Clock,
+  AlertCircle,
+  Circle,
+  MessageSquare,
+  CheckCircle2,
 } from 'lucide-react'
-import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { cn } from '@/lib/utils'
 
 const columnsConfig = [
-  { id: 'A Fazer', label: 'To Do', dot: 'bg-pink-500', bg: 'bg-[#FAF7F2]' },
+  {
+    id: 'Pendente',
+    label: 'PENDENTE',
+    dot: 'bg-[#8C7B6C]',
+    countColor: 'bg-[#E8E2D9] text-[#8C7B6C]',
+  },
   {
     id: 'Em Progresso',
-    label: 'In Progress',
-    dot: 'bg-amber-500',
-    bg: 'bg-[#FAF7F2]',
+    label: 'EM PROGRESSO',
+    dot: 'bg-[#E5B567]',
+    countColor: 'bg-[#F3EEE7] text-[#C2714F]',
   },
   {
-    id: 'Em Revisão',
-    label: 'In Review',
-    dot: 'bg-blue-500',
-    bg: 'bg-[#FAF7F2]',
+    id: 'Concluída',
+    label: 'CONCLUÍDA',
+    dot: 'bg-[#A1C9A3]',
+    countColor: 'bg-[#E8F2E8] text-[#4CAF50]',
   },
-  { id: 'Concluído', label: 'Done', dot: 'bg-green-500', bg: 'bg-[#FAF7F2]' },
 ]
-
-const priorityConfig = {
-  Baixa: {
-    label: 'Low',
-    color: 'bg-secondary text-muted-foreground border-transparent',
-  },
-  Média: {
-    label: 'Medium',
-    color: 'bg-warning-bg text-warning border-transparent',
-  },
-  Alta: { label: 'High', color: 'bg-danger-bg text-danger border-transparent' },
-}
 
 export default function TasksBoard({
   tasks,
@@ -52,36 +44,13 @@ export default function TasksBoard({
   updateTask: (id: string, updates: Partial<Task>) => void
   onCardClick: (t: Task) => void
 }) {
-  const navigate = useNavigate()
   const [draggingId, setDraggingId] = useState<string | null>(null)
   const [dragOverCol, setDragOverCol] = useState<string | null>(null)
 
   const handleDragStart = (e: React.DragEvent, id: string) => {
     e.dataTransfer.setData('taskId', id)
     e.dataTransfer.effectAllowed = 'move'
-
-    const target = e.currentTarget as HTMLElement
-    const clone = target.cloneNode(true) as HTMLElement
-    clone.style.width = `${target.offsetWidth}px`
-    clone.style.height = `${target.offsetHeight}px`
-    clone.style.position = 'absolute'
-    clone.style.top = '-9999px'
-    clone.style.left = '-9999px'
-    clone.style.opacity = '1'
-    clone.style.transform = 'none'
-    clone.style.pointerEvents = 'none'
-    document.body.appendChild(clone)
-
-    const rect = target.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-
-    e.dataTransfer.setDragImage(clone, x, y)
-
-    setTimeout(() => {
-      document.body.removeChild(clone)
-      setDraggingId(id)
-    }, 0)
+    setDraggingId(id)
   }
 
   const handleDragEnd = () => {
@@ -98,7 +67,7 @@ export default function TasksBoard({
   }
 
   return (
-    <div className="flex gap-6 overflow-x-auto pb-4 h-full min-h-[500px] items-start no-scrollbar">
+    <div className="flex gap-6 overflow-x-auto pb-4 h-full items-start no-scrollbar">
       {columnsConfig.map((col) => {
         const colTasks = tasks.filter((t) => t.status === col.id)
         const isDragOver = dragOverCol === col.id
@@ -107,9 +76,8 @@ export default function TasksBoard({
           <div
             key={col.id}
             className={cn(
-              'w-80 shrink-0 flex flex-col rounded-2xl p-4 transition-all duration-200 relative border border-transparent',
-              col.bg,
-              isDragOver && 'border-primary/30 shadow-sm bg-opacity-80',
+              'w-[340px] shrink-0 flex flex-col rounded-2xl transition-all duration-200 relative',
+              isDragOver && 'bg-black/5 ring-2 ring-primary/20',
             )}
             onDragOver={(e) => {
               e.preventDefault()
@@ -118,31 +86,32 @@ export default function TasksBoard({
             }}
             onDrop={(e) => handleDrop(e, col.id)}
           >
+            {/* Column Header */}
             <div className="flex justify-between items-center mb-4 px-1">
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${col.dot}`} />
-                <h3 className="font-bold text-sm text-foreground">
+                <h3 className="font-bold text-[13px] text-[#3D2B1F] tracking-wide">
                   {col.label}
                 </h3>
-                <span className="text-xs font-semibold text-muted-foreground bg-white/60 rounded-full px-2 py-0.5">
+                <span
+                  className={cn(
+                    'text-[11px] font-bold rounded-full px-2.5 py-0.5',
+                    col.countColor,
+                  )}
+                >
                   {colTasks.length}
                 </span>
               </div>
-              <button className="text-muted-foreground hover:text-foreground">
+              <button className="text-[#8C7B6C] hover:text-[#3D2B1F] transition-colors">
                 <MoreHorizontal size={16} />
               </button>
             </div>
-            <div className="flex flex-col gap-3 flex-1 overflow-y-auto min-h-[100px] pb-4 no-scrollbar">
+
+            {/* Cards */}
+            <div className="flex flex-col gap-3 flex-1 overflow-y-auto min-h-[150px] pb-4 no-scrollbar">
               {colTasks.map((t) => {
-                const pc = priorityConfig[t.priority]
-                const completedSubtasks =
-                  t.subtasks?.filter((s) => s.isCompleted).length || 0
-                const totalSubtasks = t.subtasks?.length || 0
-                const progress =
-                  totalSubtasks > 0
-                    ? Math.round((completedSubtasks / totalSubtasks) * 100)
-                    : 0
                 const isDragging = draggingId === t.id
+                const isCompleted = t.status === 'Concluída'
 
                 return (
                   <Card
@@ -152,102 +121,126 @@ export default function TasksBoard({
                     onDragEnd={handleDragEnd}
                     onClick={() => onCardClick(t)}
                     className={cn(
-                      'cursor-grab active:cursor-grabbing shadow-sm rounded-2xl bg-white relative overflow-hidden',
+                      'cursor-grab active:cursor-grabbing border-[#E8E2D9] rounded-[14px] bg-white transition-all',
                       isDragging
-                        ? 'opacity-40 border-primary/40 border-dashed shadow-none ring-0'
-                        : 'opacity-100 border-border hover:shadow-md hover:border-primary/40 transition-all',
+                        ? 'opacity-40 shadow-none'
+                        : 'shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:border-[#C2714F]/40',
                     )}
                   >
-                    <div
-                      className={cn(
-                        'absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl',
-                        t.priority === 'Alta' && 'bg-danger',
-                        t.priority === 'Média' && 'bg-warning',
-                        t.priority === 'Baixa' && 'bg-border',
-                      )}
-                    />
-                    <CardContent className="p-4 flex flex-col gap-3 pl-5">
-                      <div className="flex justify-between items-start">
+                    <CardContent className="p-4 flex flex-col gap-3.5">
+                      <div className="flex justify-between items-center">
                         <Badge
                           variant="outline"
-                          className={`font-medium px-2 py-0.5 text-[10px] ${pc.color}`}
+                          className={cn(
+                            'px-2 py-0.5 text-[10px] font-bold border-[#E8E2D9] bg-white',
+                            t.categoryColor || 'text-[#8C7B6C]',
+                            isCompleted && 'opacity-60',
+                          )}
                         >
-                          {pc.label}
+                          {t.category || 'Geral'}
                         </Badge>
-                        <button className="text-muted-foreground hover:text-foreground">
-                          <MoreHorizontal size={14} />
-                        </button>
+                        <div
+                          className={cn(
+                            'text-[#8C7B6C]',
+                            isCompleted && 'opacity-60',
+                          )}
+                        >
+                          {t.iconType === 'clock' && <Clock size={14} />}
+                          {t.iconType === 'alert' && (
+                            <AlertCircle size={14} className="text-[#C2714F]" />
+                          )}
+                          {t.iconType === 'dot' && (
+                            <Circle
+                              size={10}
+                              className="fill-[#E5B567] text-[#E5B567]"
+                            />
+                          )}
+                          {t.iconType === 'comment' && (
+                            <MessageSquare size={14} />
+                          )}
+                          {t.iconType === 'check' && (
+                            <CheckCircle2
+                              size={14}
+                              className="text-[#A1C9A3]"
+                            />
+                          )}
+                        </div>
                       </div>
 
-                      <span className="font-bold text-foreground text-sm leading-snug">
+                      <span
+                        className={cn(
+                          'font-bold text-[14px] leading-snug',
+                          isCompleted
+                            ? 'line-through text-[#8C7B6C] opacity-70'
+                            : 'text-[#3D2B1F]',
+                        )}
+                      >
                         {t.title}
                       </span>
 
-                      <div className="space-y-1.5 mt-2">
-                        <div className="flex justify-between text-[11px] font-medium text-muted-foreground">
-                          <span>Progress</span>
-                          <span>{progress}%</span>
-                        </div>
-                        <Progress
-                          value={progress}
-                          className="h-1.5 bg-secondary"
-                        />
-                      </div>
+                      {t.status === 'Em Progresso' &&
+                        t.progress !== undefined && (
+                          <div className="w-full mt-1">
+                            <Progress
+                              value={t.progress}
+                              indicatorColor="bg-[#E5B567]"
+                              className="h-1 bg-[#F3EEE7]"
+                            />
+                          </div>
+                        )}
 
-                      <div className="flex justify-between items-center mt-3 pt-3 border-t border-border/50">
-                        <div className="flex -space-x-2">
-                          <Avatar className="w-6 h-6 border-2 border-white">
-                            <AvatarImage src={t.avatar} />
-                            <AvatarFallback className="text-[10px] bg-secondary text-primary">
-                              {t.assignee?.[0] || 'U'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="w-6 h-6 rounded-full border-2 border-white bg-white flex items-center justify-center text-muted-foreground border-dashed">
-                            <Plus size={10} />
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground font-medium">
-                          {t.funnelId && t.nodeId && (
-                            <button
-                              className="text-primary hover:text-primary/80 bg-secondary p-1.5 rounded-md transition-colors"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                navigate(
-                                  `/canvas/${t.funnelId}?nodeId=${t.nodeId}`,
-                                )
-                              }}
-                              title="Ver no Canvas"
+                      <div className="flex justify-between items-end mt-1">
+                        <div className="flex -space-x-1.5">
+                          {t.assignees?.map((assignee, idx) => (
+                            <div
+                              key={idx}
+                              className={cn(
+                                'w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold text-white border-[1.5px] border-white',
+                                assignee.color,
+                                isCompleted && 'opacity-70',
+                              )}
                             >
-                              <Network size={12} />
-                            </button>
-                          )}
-                          <div className="flex items-center gap-1">
-                            <Paperclip size={12} />
-                            {t.attachmentCount || 0}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <MessageSquare size={12} />
-                            {t.comments?.length || 0}
-                          </div>
+                              {assignee.initials}
+                            </div>
+                          ))}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={cn(
+                              'text-[10px] font-bold uppercase tracking-wider',
+                              t.dateColor || 'text-[#8C7B6C]',
+                              isCompleted && 'opacity-60',
+                              t.status === 'Em Progresso' &&
+                                t.progress !== undefined &&
+                                'text-[#3D2B1F]',
+                            )}
+                          >
+                            {t.dateLabel}
+                          </span>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
                 )
               })}
-              {isDragOver &&
-                draggingId &&
-                !colTasks.find((t) => t.id === draggingId) && (
-                  <div className="h-32 rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 animate-fade-in transition-all flex items-center justify-center">
-                    <span className="text-xs font-medium text-primary/50">
-                      Drop task here
-                    </span>
-                  </div>
-                )}
+
+              {col.id === 'Pendente' && (
+                <button className="w-full mt-1 py-3 rounded-[14px] border border-dashed border-[#E8E2D9] text-[#8C7B6C] text-xs font-bold hover:bg-[#F3EEE7] hover:text-[#3D2B1F] flex items-center justify-center gap-1.5 transition-colors">
+                  <Plus size={14} className="stroke-[3]" /> Adicionar
+                </button>
+              )}
             </div>
           </div>
         )
       })}
+
+      {/* New Column Placeholder */}
+      <div className="w-[340px] shrink-0 flex flex-col rounded-2xl border border-dashed border-[#E8E2D9] h-[140px] items-center justify-center text-[#8C7B6C] hover:bg-[#F3EEE7] hover:text-[#3D2B1F] transition-colors cursor-pointer mt-10">
+        <div className="w-8 h-8 rounded-full border border-current flex items-center justify-center mb-2">
+          <Plus size={16} className="stroke-[3]" />
+        </div>
+        <span className="text-sm font-bold">Criar Coluna</span>
+      </div>
     </div>
   )
 }

@@ -3,9 +3,8 @@ import useTaskStore from '@/stores/useTaskStore'
 import useQuickActionStore from '@/stores/useQuickActionStore'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Plus, LayoutGrid, LayoutList, List } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import TasksBoard from '@/components/tasks/TasksBoard'
-import TasksOverview from '@/components/tasks/TasksOverview'
 import TasksList from '@/components/tasks/TasksList'
 import TaskDetailSheet from '@/components/tasks/TaskDetailSheet'
 import { Task } from '@/types'
@@ -21,53 +20,41 @@ export default function Tasks() {
 
   return (
     <div className="p-6 md:p-8 max-w-[1600px] w-full mx-auto h-full flex flex-col animate-fade-in">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 md:px-8 border-b border-border -mx-6 -mt-6 md:-mx-8 md:-mt-8 mb-8 min-h-[80px] shrink-0">
-        <div className="space-y-0.5">
-          <h1 className="text-xl font-bold tracking-tight text-foreground">
-            Tarefas
-          </h1>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-              {tasks.length} Tarefas no total
-            </span>
+      <Tabs defaultValue="board" className="flex-1 flex flex-col min-h-0">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 shrink-0">
+          <div className="space-y-1">
+            <h1 className="text-[28px] font-bold tracking-tight text-[#3D2B1F]">
+              Tarefas
+            </h1>
+            <p className="text-[15px] font-medium text-[#8C7B6C]">
+              Gerencie seu fluxo de trabalho e prioridades
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <TabsList className="bg-white border border-[#E8E2D9] h-10 p-1 rounded-lg shadow-sm">
+              <TabsTrigger
+                value="board"
+                className="rounded-md px-4 py-1.5 text-[13px] font-bold data-[state=active]:bg-[#FAF7F2] data-[state=active]:text-[#3D2B1F] text-[#8C7B6C] data-[state=active]:shadow-none"
+              >
+                Board
+              </TabsTrigger>
+              <TabsTrigger
+                value="list"
+                className="rounded-md px-4 py-1.5 text-[13px] font-bold data-[state=active]:bg-[#FAF7F2] data-[state=active]:text-[#3D2B1F] text-[#8C7B6C] data-[state=active]:shadow-none"
+              >
+                Lista
+              </TabsTrigger>
+            </TabsList>
+            <Button
+              onClick={() => setAction({ type: 'task', mode: 'create' })}
+              className="bg-[#C2714F] hover:bg-[#a65d3f] text-white rounded-full px-5 h-10 shadow-none font-bold"
+            >
+              <Plus size={16} className="mr-2 stroke-[3]" /> Nova Tarefa
+            </Button>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <Button onClick={() => setAction({ type: 'task', mode: 'create' })}>
-            <Plus size={16} className="mr-2" /> Nova Tarefa
-          </Button>
-        </div>
-      </div>
 
-      <Tabs defaultValue="board" className="flex-1 flex flex-col min-h-0">
-        <TabsList className="bg-card gap-2 p-1.5 rounded-full flex flex-wrap shrink-0 justify-start border border-border inline-flex h-auto w-fit mb-6">
-          <TabsTrigger
-            value="overview"
-            className="rounded-full px-5 py-2 data-[state=active]:bg-secondary data-[state=active]:text-primary text-muted-foreground hover:text-foreground font-medium transition-all text-md"
-          >
-            <LayoutList className="w-4 h-4 mr-2" /> Overview
-          </TabsTrigger>
-          <TabsTrigger
-            value="board"
-            className="rounded-full px-5 py-2 data-[state=active]:bg-secondary data-[state=active]:text-primary text-muted-foreground hover:text-foreground font-medium transition-all text-md"
-          >
-            <LayoutGrid className="w-4 h-4 mr-2" /> Quadro
-          </TabsTrigger>
-          <TabsTrigger
-            value="list"
-            className="rounded-full px-5 py-2 data-[state=active]:bg-secondary data-[state=active]:text-primary text-muted-foreground hover:text-foreground font-medium transition-all text-md"
-          >
-            <List className="w-4 h-4 mr-2" /> Lista
-          </TabsTrigger>
-        </TabsList>
-
-        <div className="flex-1 overflow-auto -mx-4 px-4 pb-8 no-scrollbar">
-          <TabsContent
-            value="overview"
-            className="mt-0 h-full border-none outline-none"
-          >
-            <TasksOverview tasks={tasks} />
-          </TabsContent>
+        <div className="flex-1 overflow-auto pb-8 no-scrollbar">
           <TabsContent
             value="board"
             className="mt-0 h-full border-none outline-none"
