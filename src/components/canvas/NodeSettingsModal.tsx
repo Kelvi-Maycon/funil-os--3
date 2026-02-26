@@ -5,7 +5,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -45,17 +44,6 @@ type NodeSettingsModalProps = {
   onSave: (id: string, updates: Partial<NodeData>) => void
 }
 
-const COLORS = [
-  '#C2714F',
-  '#3D2B1F',
-  '#E5B567',
-  '#10B981',
-  '#3B82F6',
-  '#8B5CF6',
-  '#EF4444',
-  '#6B7280',
-]
-
 export function NodeSettingsModal({
   node,
   isOpen,
@@ -64,11 +52,8 @@ export function NodeSettingsModal({
 }: NodeSettingsModalProps) {
   const [name, setName] = useState('')
   const [subtitle, setSubtitle] = useState('')
-  const [status, setStatus] = useState('Rascunho')
   const [description, setDescription] = useState('')
   const [isTaskMode, setIsTaskMode] = useState(false)
-  const [isCompleted, setIsCompleted] = useState(false)
-  const [color, setColor] = useState('')
   const [linkedDocs, setLinkedDocs] = useState<string[]>([])
   const [linkedAssets, setLinkedAssets] = useState<string[]>([])
 
@@ -88,11 +73,8 @@ export function NodeSettingsModal({
     if (isOpen && node) {
       setName(node.data.name || '')
       setSubtitle(node.data.subtitle || '')
-      setStatus(node.data.status || 'Rascunho')
       setDescription(node.data.description || '')
       setIsTaskMode(node.data.isTaskMode || false)
-      setIsCompleted(node.data.isCompleted || false)
-      setColor(node.data.color || '')
       setLinkedDocs(node.data.linkedDocumentIds || [])
       setLinkedAssets(node.data.linkedAssetIds || [])
     }
@@ -102,22 +84,13 @@ export function NodeSettingsModal({
 
   const handleSave = () => {
     onSave(node.id, {
-      name,
       subtitle,
-      status,
       description,
       isTaskMode,
-      isCompleted,
       linkedDocumentIds: linkedDocs,
       linkedAssetIds: linkedAssets,
-      color,
     })
     onClose()
-  }
-
-  const handleNameChange = (val: string) => {
-    setName(val)
-    onSave(node.id, { name: val })
   }
 
   const addTask = () => {
@@ -137,198 +110,82 @@ export function NodeSettingsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto p-6 flex flex-col gap-6">
-        <DialogHeader className="flex flex-row items-center justify-between space-y-0">
-          <div>
-            <DialogTitle className="text-xl font-bold text-slate-900">
-              {name || 'Node'}
-            </DialogTitle>
-            <DialogDescription className="text-sm font-medium text-slate-500 mt-1">
-              {node.type}
-            </DialogDescription>
-          </div>
-          <Badge
-            className={cn(
-              'pointer-events-none',
-              status === 'Ativo'
-                ? 'bg-green-500'
-                : status === 'Rascunho'
-                  ? 'bg-slate-400'
-                  : status === 'Pausado'
-                    ? 'bg-amber-500'
-                    : 'bg-blue-500',
-            )}
-          >
-            {status}
-          </Badge>
+      <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto p-6 flex flex-col gap-6 bg-white border-[#E8E2D9] shadow-xl sm:rounded-[2rem]">
+        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <DialogTitle className="text-[28px] font-black tracking-tight text-[#3D2B1F]">
+            {name || 'Node'}
+          </DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="geral" className="w-full flex-1">
-          <TabsList className="grid w-full grid-cols-4 bg-slate-100 rounded-xl p-1 mb-6">
+        <Tabs defaultValue="conf" className="w-full flex-1">
+          <TabsList className="flex w-full bg-[#FAF7F2] rounded-full p-1.5 mb-6 h-auto">
             <TabsTrigger
-              value="geral"
-              className="rounded-lg text-xs font-semibold"
+              value="conf"
+              className="flex-1 rounded-full text-xs py-2 font-bold text-[#8C7B6C] data-[state=active]:bg-white data-[state=active]:text-[#3D2B1F] data-[state=active]:shadow-sm transition-all"
             >
-              Geral
+              Conf
             </TabsTrigger>
             <TabsTrigger
-              value="tarefas"
-              className="rounded-lg text-xs font-semibold"
+              value="docs"
+              className="flex-1 rounded-full text-xs py-2 font-bold text-[#8C7B6C] data-[state=active]:bg-white data-[state=active]:text-[#3D2B1F] data-[state=active]:shadow-sm transition-all"
             >
-              Tarefas
+              Docs
             </TabsTrigger>
             <TabsTrigger
-              value="recursos"
-              className="rounded-lg text-xs font-semibold"
+              value="tasks"
+              className="flex-1 rounded-full text-xs py-2 font-bold text-[#8C7B6C] data-[state=active]:bg-white data-[state=active]:text-[#3D2B1F] data-[state=active]:shadow-sm transition-all"
             >
-              Recursos
+              Tasks
             </TabsTrigger>
             <TabsTrigger
-              value="aparencia"
-              className="rounded-lg text-xs font-semibold"
+              value="assets"
+              className="flex-1 rounded-full text-xs py-2 font-bold text-[#8C7B6C] data-[state=active]:bg-white data-[state=active]:text-[#3D2B1F] data-[state=active]:shadow-sm transition-all"
             >
-              Aparência
+              Assets
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="geral" className="space-y-4 outline-none">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold text-slate-700">
-                  Nome
-                </Label>
-                <Input
-                  value={name}
-                  onChange={(e) => handleNameChange(e.target.value)}
-                  className="h-10 rounded-xl"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold text-slate-700">
-                  Subtítulo
-                </Label>
-                <Input
-                  value={subtitle}
-                  onChange={(e) => setSubtitle(e.target.value)}
-                  className="h-10 rounded-xl"
-                />
-              </div>
-            </div>
+          <TabsContent value="conf" className="space-y-6 outline-none">
             <div className="space-y-2">
-              <Label className="text-sm font-semibold text-slate-700">
-                Status
+              <Label className="text-[11px] font-bold text-[#8C7B6C] tracking-widest uppercase">
+                SUBTÍTULO
               </Label>
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger className="h-10 rounded-xl">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl">
-                  <SelectItem value="Rascunho">Rascunho</SelectItem>
-                  <SelectItem value="Ativo">Ativo</SelectItem>
-                  <SelectItem value="Pausado">Pausado</SelectItem>
-                  <SelectItem value="Concluído">Concluído</SelectItem>
-                </SelectContent>
-              </Select>
+              <Input
+                value={subtitle}
+                onChange={(e) => setSubtitle(e.target.value)}
+                className="h-12 rounded-xl bg-[#FAF7F2] border-[#E8E2D9] font-bold text-[#3D2B1F] px-4 shadow-none focus-visible:ring-[#C2714F]/20"
+                placeholder="+1 filter"
+              />
             </div>
+
+            <div className="flex flex-row items-center justify-between rounded-2xl border border-[#E8E2D9] bg-[#FAF7F2] p-4">
+              <div className="space-y-0.5">
+                <Label className="text-[15px] font-bold text-[#3D2B1F]">
+                  Modo Tarefa
+                </Label>
+                <p className="text-[13px] text-[#8C7B6C] font-medium">
+                  Habilitar checklist
+                </p>
+              </div>
+              <Switch checked={isTaskMode} onCheckedChange={setIsTaskMode} />
+            </div>
+
             <div className="space-y-2">
-              <Label className="text-sm font-semibold text-slate-700">
-                Descrição Técnica
+              <Label className="text-[11px] font-bold text-[#8C7B6C] tracking-widest uppercase">
+                NOTAS ADICIONAIS
               </Label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="min-h-[100px] rounded-xl"
-                placeholder="Anotações internas..."
+                className="min-h-[120px] rounded-xl bg-[#FAF7F2] border-[#E8E2D9] font-medium text-[#3D2B1F] resize-none p-4 shadow-none focus-visible:ring-[#C2714F]/20"
+                placeholder="Adicione contexto aqui..."
               />
             </div>
           </TabsContent>
 
-          <TabsContent value="tarefas" className="space-y-4 outline-none">
-            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
-              {nodeTasks.map((t) => (
-                <div
-                  key={t.id}
-                  className="flex flex-col gap-2 bg-slate-50 p-3 rounded-xl border border-slate-100"
-                >
-                  <div className="flex gap-3 items-center">
-                    <Checkbox
-                      checked={t.status === 'Concluído'}
-                      onCheckedChange={(c) =>
-                        updateTask(t.id, {
-                          status: c ? 'Concluído' : 'Pendente',
-                        })
-                      }
-                      className="w-5 h-5 rounded data-[state=checked]:bg-[#C2714F] data-[state=checked]:border-[#C2714F]"
-                    />
-                    <Input
-                      value={t.title}
-                      onChange={(e) =>
-                        updateTask(t.id, { title: e.target.value })
-                      }
-                      className={cn(
-                        'h-8 rounded-lg bg-white font-medium text-sm',
-                        t.status === 'Concluído' &&
-                          'line-through text-slate-400',
-                      )}
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeTask(t.id)}
-                      className="h-8 w-8 text-slate-400 hover:text-red-500 shrink-0"
-                    >
-                      <Trash2 size={15} />
-                    </Button>
-                  </div>
-                  <div className="flex gap-2 pl-8">
-                    <Select
-                      value={t.priority}
-                      onValueChange={(v) =>
-                        updateTask(t.id, { priority: v as any })
-                      }
-                    >
-                      <SelectTrigger className="h-8 rounded-lg text-xs w-[120px] bg-white">
-                        <SelectValue placeholder="Prioridade" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-lg">
-                        <SelectItem value="Baixa">Baixa</SelectItem>
-                        <SelectItem value="Média">Média</SelectItem>
-                        <SelectItem value="Alta">Alta</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Input
-                      type="date"
-                      value={t.deadline ? t.deadline.split('T')[0] : ''}
-                      onChange={(e) =>
-                        updateTask(t.id, {
-                          deadline: e.target.value
-                            ? new Date(e.target.value).toISOString()
-                            : undefined,
-                        })
-                      }
-                      className="h-8 rounded-lg text-xs bg-white flex-1"
-                    />
-                  </div>
-                </div>
-              ))}
-              {nodeTasks.length === 0 && (
-                <p className="text-sm text-slate-500 text-center py-4">
-                  Nenhuma tarefa vinculada.
-                </p>
-              )}
-            </div>
-            <Button
-              onClick={addTask}
-              variant="outline"
-              className="w-full rounded-xl border-dashed h-10 gap-2"
-            >
-              <Plus size={16} /> Nova Tarefa
-            </Button>
-          </TabsContent>
-
-          <TabsContent value="recursos" className="space-y-6 outline-none">
+          <TabsContent value="docs" className="space-y-4 outline-none">
             <div className="space-y-3">
-              <Label className="text-sm font-semibold text-slate-700">
+              <Label className="text-sm font-semibold text-[#3D2B1F]">
                 Documentos Vinculados
               </Label>
               <Select
@@ -337,14 +194,18 @@ export function NodeSettingsModal({
                   setLinkedDocs([...linkedDocs, val])
                 }
               >
-                <SelectTrigger className="h-10 rounded-xl">
+                <SelectTrigger className="h-11 rounded-xl bg-[#FAF7F2] border-[#E8E2D9] font-medium">
                   <SelectValue placeholder="Buscar documento..." />
                 </SelectTrigger>
-                <SelectContent className="rounded-xl">
+                <SelectContent className="rounded-xl border-[#E8E2D9] shadow-lg">
                   {docs
                     .filter((d) => !linkedDocs.includes(d.id))
                     .map((d) => (
-                      <SelectItem key={d.id} value={d.id}>
+                      <SelectItem
+                        key={d.id}
+                        value={d.id}
+                        className="font-medium"
+                      >
                         {d.title}
                       </SelectItem>
                     ))}
@@ -358,25 +219,30 @@ export function NodeSettingsModal({
                     <Badge
                       key={id}
                       variant="outline"
-                      className="pl-2 pr-1 py-1 bg-white border-slate-200 rounded-lg gap-1.5 flex items-center"
+                      className="pl-2 pr-1.5 py-1.5 bg-white border-[#E8E2D9] rounded-lg gap-1.5 flex items-center shadow-sm"
                     >
-                      <FileText size={13} className="text-[#C2714F]" />{' '}
-                      <span className="text-xs">{d.title}</span>
+                      <FileText size={14} className="text-[#C2714F]" />{' '}
+                      <span className="text-xs font-semibold text-[#3D2B1F]">
+                        {d.title}
+                      </span>
                       <button
                         onClick={() =>
                           setLinkedDocs(linkedDocs.filter((l) => l !== id))
                         }
-                        className="text-slate-400 hover:text-slate-700 ml-1"
+                        className="text-[#8C7B6C] hover:text-[#C2714F] ml-1 transition-colors"
                       >
-                        <X size={13} />
+                        <X size={14} />
                       </button>
                     </Badge>
                   )
                 })}
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="assets" className="space-y-4 outline-none">
             <div className="space-y-3">
-              <Label className="text-sm font-semibold text-slate-700">
+              <Label className="text-sm font-semibold text-[#3D2B1F]">
                 Ativos da Biblioteca
               </Label>
               <Select
@@ -385,14 +251,18 @@ export function NodeSettingsModal({
                   setLinkedAssets([...linkedAssets, val])
                 }
               >
-                <SelectTrigger className="h-10 rounded-xl">
+                <SelectTrigger className="h-11 rounded-xl bg-[#FAF7F2] border-[#E8E2D9] font-medium">
                   <SelectValue placeholder="Buscar ativo..." />
                 </SelectTrigger>
-                <SelectContent className="rounded-xl">
+                <SelectContent className="rounded-xl border-[#E8E2D9] shadow-lg">
                   {resources
                     .filter((a) => !linkedAssets.includes(a.id))
                     .map((a) => (
-                      <SelectItem key={a.id} value={a.id}>
+                      <SelectItem
+                        key={a.id}
+                        value={a.id}
+                        className="font-medium"
+                      >
                         {a.title}
                       </SelectItem>
                     ))}
@@ -406,21 +276,23 @@ export function NodeSettingsModal({
                     <Badge
                       key={id}
                       variant="outline"
-                      className="pl-2 pr-1 py-1 bg-white border-slate-200 rounded-lg gap-1.5 flex items-center"
+                      className="pl-2 pr-1.5 py-1.5 bg-white border-[#E8E2D9] rounded-lg gap-1.5 flex items-center shadow-sm"
                     >
                       {a.type === 'link' ? (
-                        <LinkIcon size={13} className="text-blue-500" />
+                        <LinkIcon size={14} className="text-[#C2714F]" />
                       ) : (
-                        <ImageIcon size={13} className="text-purple-500" />
+                        <ImageIcon size={14} className="text-[#C2714F]" />
                       )}
-                      <span className="text-xs">{a.title}</span>
+                      <span className="text-xs font-semibold text-[#3D2B1F]">
+                        {a.title}
+                      </span>
                       <button
                         onClick={() =>
                           setLinkedAssets(linkedAssets.filter((l) => l !== id))
                         }
-                        className="text-slate-400 hover:text-slate-700 ml-1"
+                        className="text-[#8C7B6C] hover:text-[#C2714F] ml-1 transition-colors"
                       >
-                        <X size={13} />
+                        <X size={14} />
                       </button>
                     </Badge>
                   )
@@ -429,79 +301,100 @@ export function NodeSettingsModal({
             </div>
           </TabsContent>
 
-          <TabsContent value="aparencia" className="space-y-6 outline-none">
-            <div className="space-y-3">
-              <Label className="text-sm font-semibold text-slate-700">
-                Cor de Destaque
-              </Label>
-              <div className="flex flex-wrap gap-3">
-                <button
-                  onClick={() => setColor('')}
-                  className={cn(
-                    'w-8 h-8 rounded-full border-2 border-slate-200 flex items-center justify-center bg-slate-50 hover:bg-slate-100 transition-all',
-                    !color && 'ring-2 ring-slate-400 ring-offset-2',
-                  )}
+          <TabsContent value="tasks" className="space-y-4 outline-none">
+            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-[#E8E2D9]">
+              {nodeTasks.map((t) => (
+                <div
+                  key={t.id}
+                  className="flex flex-col gap-3 bg-[#FAF7F2] p-3.5 rounded-xl border border-[#E8E2D9]"
                 >
-                  <X size={14} className="text-slate-400" />
-                </button>
-                {COLORS.map((c) => (
-                  <button
-                    key={c}
-                    onClick={() => setColor(c)}
-                    style={{ backgroundColor: c }}
-                    className={cn(
-                      'w-8 h-8 rounded-full border border-black/10 hover:scale-110 transition-all shadow-sm',
-                      color === c &&
-                        'ring-2 ring-offset-2 ring-slate-400 scale-110',
-                    )}
-                  />
-                ))}
-              </div>
+                  <div className="flex gap-3 items-center">
+                    <Checkbox
+                      checked={t.status === 'Concluído'}
+                      onCheckedChange={(c) =>
+                        updateTask(t.id, {
+                          status: c ? 'Concluído' : 'Pendente',
+                        })
+                      }
+                      className="w-5 h-5 rounded-[6px] border-[#8C7B6C]/30 data-[state=checked]:bg-[#C2714F] data-[state=checked]:border-[#C2714F]"
+                    />
+                    <Input
+                      value={t.title}
+                      onChange={(e) =>
+                        updateTask(t.id, { title: e.target.value })
+                      }
+                      className={cn(
+                        'h-9 rounded-lg bg-white font-semibold text-[13px] border-[#E8E2D9] text-[#3D2B1F] shadow-sm focus-visible:ring-[#C2714F]/20',
+                        t.status === 'Concluído' &&
+                          'line-through text-[#8C7B6C] opacity-70',
+                      )}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeTask(t.id)}
+                      className="h-9 w-9 text-[#8C7B6C] hover:text-red-500 hover:bg-white shrink-0 rounded-lg"
+                    >
+                      <Trash2 size={16} />
+                    </Button>
+                  </div>
+                  <div className="flex gap-2 pl-8">
+                    <Select
+                      value={t.priority}
+                      onValueChange={(v) =>
+                        updateTask(t.id, { priority: v as any })
+                      }
+                    >
+                      <SelectTrigger className="h-8 rounded-lg text-xs w-[110px] bg-white border-[#E8E2D9] text-[#3D2B1F] font-semibold shadow-sm">
+                        <SelectValue placeholder="Prioridade" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl border-[#E8E2D9] shadow-lg">
+                        <SelectItem value="Baixa" className="font-medium">
+                          Baixa
+                        </SelectItem>
+                        <SelectItem value="Média" className="font-medium">
+                          Média
+                        </SelectItem>
+                        <SelectItem value="Alta" className="font-medium">
+                          Alta
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      type="date"
+                      value={t.deadline ? t.deadline.split('T')[0] : ''}
+                      onChange={(e) =>
+                        updateTask(t.id, {
+                          deadline: e.target.value
+                            ? new Date(e.target.value).toISOString()
+                            : undefined,
+                        })
+                      }
+                      className="h-8 rounded-lg text-xs bg-white border-[#E8E2D9] text-[#3D2B1F] font-semibold flex-1 shadow-sm focus-visible:ring-[#C2714F]/20"
+                    />
+                  </div>
+                </div>
+              ))}
+              {nodeTasks.length === 0 && (
+                <div className="text-sm text-[#8C7B6C] text-center py-8 font-medium bg-[#FAF7F2] rounded-xl border border-dashed border-[#E8E2D9]">
+                  Nenhuma tarefa vinculada.
+                </div>
+              )}
             </div>
-            <div className="flex flex-row items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-4">
-              <div className="space-y-1">
-                <Label className="text-sm font-bold text-slate-800">
-                  Task Mode
-                </Label>
-                <p className="text-xs text-slate-500 font-medium">
-                  Habilitar checklist direto no canvas.
-                </p>
-              </div>
-              <Switch
-                checked={isTaskMode}
-                onCheckedChange={setIsTaskMode}
-                className="data-[state=checked]:bg-[#f95015]"
-              />
-            </div>
-            <div className="flex flex-row items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-4">
-              <div className="space-y-1">
-                <Label className="text-sm font-bold text-slate-800">
-                  Concluído
-                </Label>
-                <p className="text-xs text-slate-500 font-medium">
-                  Aplica efeito visual de finalizado.
-                </p>
-              </div>
-              <Switch
-                checked={isCompleted}
-                onCheckedChange={setIsCompleted}
-                className="data-[state=checked]:bg-green-500"
-              />
-            </div>
+            <Button
+              onClick={addTask}
+              variant="outline"
+              className="w-full rounded-xl border-dashed border-[#E8E2D9] bg-white text-[#3D2B1F] font-bold hover:text-[#C2714F] hover:border-[#C2714F] h-12 gap-2 hover:bg-[#FAF7F2] transition-colors"
+            >
+              <Plus size={18} /> Nova Tarefa
+            </Button>
           </TabsContent>
         </Tabs>
 
-        <DialogFooter className="mt-2 sm:justify-end gap-3">
-          <Button
-            variant="ghost"
-            onClick={onClose}
-            className="rounded-full px-6 font-semibold"
-          >
-            Cancelar
-          </Button>
+        <DialogFooter className="mt-4 sm:justify-end gap-3 pt-4 border-t border-[#E8E2D9]/60">
           <Button
             onClick={handleSave}
-            className="rounded-full px-6 font-semibold bg-[#C2714F] hover:bg-[#a65d3f] text-white"
+            className="w-full rounded-full h-12 text-[15px] font-bold bg-[#C2714F] hover:bg-[#a65d3f] text-white shadow-md transition-transform hover:scale-[1.02] active:scale-[0.98]"
           >
             Salvar Alterações
           </Button>

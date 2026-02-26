@@ -770,25 +770,6 @@ export default function NodeItem({
         </div>
       </div>
 
-      {isFeatured && (
-        <div className="mt-2 flex flex-col gap-1.5 pt-3 border-t border-[#E8E2D9]">
-          <div className="flex justify-between items-center text-[11px] font-bold">
-            <span className="text-[#8C7B6C] uppercase tracking-wider">
-              Retenção
-            </span>
-            <span className="text-[#C2714F]">
-              {node.data.retention || '42%'}
-            </span>
-          </div>
-          <div className="h-2 w-full bg-[#FAF7F2] rounded-full overflow-hidden border border-[#E8E2D9]/50">
-            <div
-              className="h-full bg-gradient-to-r from-[#C2714F] to-[#d68563] rounded-full"
-              style={{ width: node.data.retention || '42%' }}
-            />
-          </div>
-        </div>
-      )}
-
       {node.data.isTaskMode && (
         <div className="mt-2 flex flex-col gap-1.5">
           {linkedTasks.length > 0 && (
