@@ -51,8 +51,6 @@ const icons: Record<string, any> = {
   Goal: CheckCircle,
 }
 
-type Metric = { label: string; value: string }
-
 type NodeItemProps = {
   node: Node
   selected: boolean
@@ -771,38 +769,6 @@ export default function NodeItem({
           </span>
         </div>
       </div>
-
-      {node.data.metrics && (node.data.metrics as Metric[]).length > 0 && (
-        <div
-          className={cn(
-            'flex flex-wrap items-center gap-4 mt-2 pt-3 border-t',
-            isTraffic && !customColor ? 'border-white/10' : 'border-[#E8E2D9]',
-          )}
-        >
-          {(node.data.metrics as Metric[]).map((m: any, i: number) => (
-            <div key={i} className="flex flex-col gap-0.5">
-              <span
-                className={cn(
-                  'text-[10px] font-bold uppercase tracking-wider',
-                  isTraffic && !customColor
-                    ? 'text-white/50'
-                    : 'text-[#8C7B6C]',
-                )}
-              >
-                {m.label}
-              </span>
-              <span
-                className={cn(
-                  'text-[13px] font-bold',
-                  isTraffic && !customColor ? 'text-white' : 'text-[#3D2B1F]',
-                )}
-              >
-                {m.value}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
 
       {isFeatured && (
         <div className="mt-2 flex flex-col gap-1.5 pt-3 border-t border-[#E8E2D9]">

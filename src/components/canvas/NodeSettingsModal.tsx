@@ -66,7 +66,6 @@ export function NodeSettingsModal({
   const [subtitle, setSubtitle] = useState('')
   const [status, setStatus] = useState('Rascunho')
   const [description, setDescription] = useState('')
-  const [metrics, setMetrics] = useState<{ label: string; value: string }[]>([])
   const [isTaskMode, setIsTaskMode] = useState(false)
   const [isCompleted, setIsCompleted] = useState(false)
   const [color, setColor] = useState('')
@@ -91,7 +90,6 @@ export function NodeSettingsModal({
       setSubtitle(node.data.subtitle || '')
       setStatus(node.data.status || 'Rascunho')
       setDescription(node.data.description || '')
-      setMetrics(node.data.metrics || [])
       setIsTaskMode(node.data.isTaskMode || false)
       setIsCompleted(node.data.isCompleted || false)
       setColor(node.data.color || '')
@@ -108,7 +106,6 @@ export function NodeSettingsModal({
       subtitle,
       status,
       description,
-      metrics,
       isTaskMode,
       isCompleted,
       linkedDocumentIds: linkedDocs,
@@ -137,12 +134,6 @@ export function NodeSettingsModal({
   const updateTask = (id: string, updates: Partial<Task>) =>
     setTasks(tasks.map((t) => (t.id === id ? { ...t, ...updates } : t)))
   const removeTask = (id: string) => setTasks(tasks.filter((t) => t.id !== id))
-  const addMetric = () =>
-    setMetrics([...metrics, { label: 'Nova Métrica', value: '0' }])
-  const updateMetric = (i: number, k: 'label' | 'value', v: string) =>
-    setMetrics(metrics.map((m, idx) => (idx === i ? { ...m, [k]: v } : m)))
-  const removeMetric = (i: number) =>
-    setMetrics(metrics.filter((_, idx) => idx !== i))
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -173,18 +164,12 @@ export function NodeSettingsModal({
         </DialogHeader>
 
         <Tabs defaultValue="geral" className="w-full flex-1">
-          <TabsList className="grid w-full grid-cols-5 bg-slate-100 rounded-xl p-1 mb-6">
+          <TabsList className="grid w-full grid-cols-4 bg-slate-100 rounded-xl p-1 mb-6">
             <TabsTrigger
               value="geral"
               className="rounded-lg text-xs font-semibold"
             >
               Geral
-            </TabsTrigger>
-            <TabsTrigger
-              value="metricas"
-              className="rounded-lg text-xs font-semibold"
-            >
-              Métricas
             </TabsTrigger>
             <TabsTrigger
               value="tarefas"
@@ -256,50 +241,6 @@ export function NodeSettingsModal({
                 placeholder="Anotações internas..."
               />
             </div>
-          </TabsContent>
-
-          <TabsContent value="metricas" className="space-y-4 outline-none">
-            <div className="space-y-3">
-              {metrics.map((m, i) => (
-                <div
-                  key={i}
-                  className="flex gap-2 items-center bg-slate-50 p-2 rounded-xl border border-slate-100"
-                >
-                  <Input
-                    value={m.label}
-                    onChange={(e) => updateMetric(i, 'label', e.target.value)}
-                    className="h-9 rounded-lg bg-white"
-                    placeholder="Label (ex: CTR)"
-                  />
-                  <Input
-                    value={m.value}
-                    onChange={(e) => updateMetric(i, 'value', e.target.value)}
-                    className="h-9 rounded-lg bg-white"
-                    placeholder="Valor (ex: 2.5%)"
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeMetric(i)}
-                    className="h-9 w-9 text-slate-400 hover:text-red-500 shrink-0"
-                  >
-                    <Trash2 size={16} />
-                  </Button>
-                </div>
-              ))}
-              {metrics.length === 0 && (
-                <p className="text-sm text-slate-500 text-center py-4">
-                  Nenhuma métrica configurada.
-                </p>
-              )}
-            </div>
-            <Button
-              onClick={addMetric}
-              variant="outline"
-              className="w-full rounded-xl border-dashed h-10 gap-2"
-            >
-              <Plus size={16} /> Adicionar Métrica
-            </Button>
           </TabsContent>
 
           <TabsContent value="tarefas" className="space-y-4 outline-none">
