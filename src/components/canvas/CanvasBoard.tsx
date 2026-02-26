@@ -1545,6 +1545,7 @@ export default function CanvasBoard({
             node={funnel.nodes.find((n) => n.id === rightPanelState.nodeId)!}
             funnel={funnel}
             defaultTab={rightPanelState.tab}
+            hideHeader={hideHeader}
             onChange={(n) =>
               onChangeWithHistory({
                 ...funnel,

@@ -3,14 +3,14 @@ import { generateId } from '@/lib/generateId'
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   X,
   FileText,
   CheckSquare,
   Image as ImageIcon,
   Plus,
-  ArrowUpCircle,
-  ArrowDownCircle,
 } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import useDocumentStore from '@/stores/useDocumentStore'
@@ -26,17 +26,20 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
+import { cn } from '@/lib/utils'
 
 export default function RightPanel({
   node,
   funnel,
   defaultTab = 'details',
+  hideHeader,
   onChange,
   onClose,
 }: {
   node: Node
   funnel: Funnel
   defaultTab?: string
+  hideHeader?: boolean
   onChange: (n: Node) => void
   onClose: () => void
 }) {
@@ -46,9 +49,36 @@ export default function RightPanel({
   const [activeTab, setActiveTab] = useState(defaultTab)
   const [inspectResource, setInspectResource] = useState<Resource | null>(null)
 
+  // Local state for Conf tab properties
+  const [name, setName] = useState(node.data.name || '')
+  const [subtitle, setSubtitle] = useState(node.data.subtitle || '')
+  const [isTaskMode, setIsTaskMode] = useState(node.data.isTaskMode || false)
+  const [notes, setNotes] = useState(node.data.notes || '')
+
   useEffect(() => {
     setActiveTab(defaultTab)
   }, [defaultTab, node.id])
+
+  useEffect(() => {
+    setName(node.data.name || '')
+    setSubtitle(node.data.subtitle || '')
+    setIsTaskMode(node.data.isTaskMode || false)
+    setNotes(node.data.notes || '')
+  }, [node])
+
+  const handleSave = () => {
+    onChange({
+      ...node,
+      data: {
+        ...node.data,
+        name,
+        subtitle,
+        isTaskMode,
+        notes,
+      },
+    })
+    onClose()
+  }
 
   const linkedDocs = docs.filter((d) =>
     node.data.linkedDocumentIds?.includes(d.id),
@@ -88,6 +118,10 @@ export default function RightPanel({
       ...node,
       data: {
         ...node.data,
+        name,
+        subtitle,
+        isTaskMode,
+        notes,
         [key]: [
           ...((node.data[key as keyof typeof node.data] as string[]) || []),
           id,
@@ -124,13 +158,22 @@ export default function RightPanel({
       ...node,
       data: {
         ...node.data,
+        name,
+        subtitle,
+        isTaskMode,
+        notes,
         linkedTaskIds: [...(node.data.linkedTaskIds || []), newTask.id],
       },
     })
   }
 
   return (
-    <div className="w-80 bg-white border-l border-[#E8E2D9] h-full flex flex-col shadow-2xl z-30 shrink-0 absolute right-0 top-0 bottom-0 rounded-l-2xl">
+    <div
+      className={cn(
+        'w-80 bg-white border-l border-[#E8E2D9] flex flex-col shadow-2xl z-30 shrink-0 absolute right-0 bottom-0 rounded-tl-2xl transition-all',
+        hideHeader ? 'top-0' : 'top-20',
+      )}
+    >
       <div className="px-6 py-6 border-b border-[#E8E2D9] shrink-0">
         <div className="flex items-center justify-between mb-4">
           <span className="text-[11px] font-bold text-[#8C7B6C] uppercase tracking-widest">
@@ -146,11 +189,9 @@ export default function RightPanel({
           </Button>
         </div>
         <input
-          className="w-full bg-transparent text-xl font-black text-[#3D2B1F] outline-none placeholder:text-[#8C7B6C]"
-          value={node.data.name}
-          onChange={(e) =>
-            onChange({ ...node, data: { ...node.data, name: e.target.value } })
-          }
+          className="w-full bg-transparent text-2xl font-black text-[#3D2B1F] outline-none placeholder:text-[#8C7B6C]"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           placeholder="Nome do Nó"
         />
       </div>
@@ -191,75 +232,39 @@ export default function RightPanel({
           value="details"
           className="flex-1 overflow-auto p-6 space-y-6 m-0 border-none outline-none no-scrollbar"
         >
-          <div className="grid grid-cols-2 gap-3 mb-2">
-            <div className="bg-[#FAF7F2] p-3.5 rounded-xl border border-[#E8E2D9]">
-              <span className="text-[10px] font-bold text-[#8C7B6C] uppercase tracking-wider">
-                Receita
-              </span>
-              <div className="text-lg font-black text-[#3D2B1F] mt-1 flex items-center justify-between">
-                14k
-                <ArrowUpCircle size={16} className="text-[#10b981]" />
-              </div>
-            </div>
-            <div className="bg-[#FAF7F2] p-3.5 rounded-xl border border-[#E8E2D9]">
-              <span className="text-[10px] font-bold text-[#8C7B6C] uppercase tracking-wider">
-                Conversão
-              </span>
-              <div className="text-lg font-black text-[#3D2B1F] mt-1 flex items-center justify-between">
-                2.4%
-                <ArrowDownCircle size={16} className="text-red-500" />
-              </div>
-            </div>
-          </div>
-
           <div className="space-y-2">
-            <label className="text-[11px] font-bold text-[#8C7B6C] uppercase tracking-widest block">
+            <Label className="text-[11px] font-bold text-[#8C7B6C] uppercase tracking-widest block mb-1.5">
               Subtítulo
-            </label>
-            <input
-              className="w-full bg-[#FAF7F2] border border-[#E8E2D9] rounded-xl px-4 py-2.5 text-sm font-bold text-[#3D2B1F] outline-none focus:border-[#C2714F] transition-colors"
-              value={node.data.subtitle || ''}
-              onChange={(e) =>
-                onChange({
-                  ...node,
-                  data: { ...node.data, subtitle: e.target.value },
-                })
-              }
+            </Label>
+            <Input
+              className="h-12 bg-[#FAF7F2] border-[#E8E2D9] rounded-xl px-4 text-sm font-bold text-[#3D2B1F] shadow-none focus-visible:ring-[#C2714F]/20"
+              value={subtitle}
+              onChange={(e) => setSubtitle(e.target.value)}
               placeholder="+1 filter"
             />
           </div>
 
           <div className="flex items-center justify-between p-4 bg-[#FAF7F2] border border-[#E8E2D9] rounded-xl">
-            <div className="flex flex-col">
-              <span className="text-sm font-bold text-[#3D2B1F]">
+            <div className="flex flex-col space-y-0.5">
+              <Label className="text-[14px] font-bold text-[#3D2B1F]">
                 Modo Tarefa
-              </span>
-              <span className="text-[11px] font-medium text-[#8C7B6C]">
+              </Label>
+              <span className="text-[12px] font-medium text-[#8C7B6C]">
                 Habilitar checklist
               </span>
             </div>
-            <Switch
-              checked={node.data.isTaskMode || false}
-              onCheckedChange={(val) =>
-                onChange({ ...node, data: { ...node.data, isTaskMode: val } })
-              }
-            />
+            <Switch checked={isTaskMode} onCheckedChange={setIsTaskMode} />
           </div>
 
           <div className="space-y-2">
-            <label className="text-[11px] font-bold text-[#8C7B6C] uppercase tracking-widest block">
+            <Label className="text-[11px] font-bold text-[#8C7B6C] uppercase tracking-widest block mb-1.5">
               Notas Adicionais
-            </label>
+            </Label>
             <Textarea
-              value={node.data.notes || ''}
-              onChange={(e) =>
-                onChange({
-                  ...node,
-                  data: { ...node.data, notes: e.target.value },
-                })
-              }
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
               placeholder="Adicione contexto aqui..."
-              className="min-h-[160px] bg-[#FAF7F2] border border-[#E8E2D9] focus:border-[#C2714F] rounded-xl p-4 resize-none text-sm font-medium text-[#3D2B1F]"
+              className="min-h-[160px] bg-[#FAF7F2] border border-[#E8E2D9] shadow-none focus-visible:ring-[#C2714F]/20 rounded-xl p-4 resize-none text-sm font-medium text-[#3D2B1F]"
             />
           </div>
         </TabsContent>
@@ -270,7 +275,7 @@ export default function RightPanel({
         >
           <div className="flex items-center gap-2">
             <Select onValueChange={(val) => linkResource('doc', val)}>
-              <SelectTrigger className="flex-1 bg-[#FAF7F2] border-[#E8E2D9] rounded-xl text-[#3D2B1F] font-bold">
+              <SelectTrigger className="flex-1 bg-[#FAF7F2] border-[#E8E2D9] rounded-xl text-[#3D2B1F] font-bold h-11">
                 <SelectValue placeholder="Vincular Documento..." />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-[#E8E2D9]">
@@ -326,7 +331,7 @@ export default function RightPanel({
         >
           <div className="flex items-center gap-2">
             <Select onValueChange={(val) => linkResource('task', val)}>
-              <SelectTrigger className="flex-1 bg-[#FAF7F2] border-[#E8E2D9] rounded-xl text-[#3D2B1F] font-bold">
+              <SelectTrigger className="flex-1 bg-[#FAF7F2] border-[#E8E2D9] rounded-xl text-[#3D2B1F] font-bold h-11">
                 <SelectValue placeholder="Importar Tarefa..." />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-[#E8E2D9]">
@@ -345,7 +350,7 @@ export default function RightPanel({
               </SelectContent>
             </Select>
             <Button
-              className="bg-[#FAF7F2] text-[#3D2B1F] hover:bg-[#E8E2D9] border border-[#E8E2D9] rounded-xl w-10 h-10 p-0"
+              className="bg-[#FAF7F2] text-[#3D2B1F] hover:bg-[#E8E2D9] border border-[#E8E2D9] rounded-xl w-11 h-11 p-0 shrink-0"
               onClick={handleCreateTask}
             >
               <Plus size={16} />
@@ -379,7 +384,7 @@ export default function RightPanel({
         >
           <div className="flex items-center gap-2">
             <Select onValueChange={(val) => linkResource('asset', val)}>
-              <SelectTrigger className="flex-1 bg-[#FAF7F2] border-[#E8E2D9] rounded-xl text-[#3D2B1F] font-bold">
+              <SelectTrigger className="flex-1 bg-[#FAF7F2] border-[#E8E2D9] rounded-xl text-[#3D2B1F] font-bold h-11">
                 <SelectValue placeholder="Vincular Recurso..." />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-[#E8E2D9]">
@@ -427,8 +432,8 @@ export default function RightPanel({
 
       <div className="p-6 border-t border-[#E8E2D9] shrink-0 bg-white">
         <Button
-          className="w-full bg-[#C2714F] hover:bg-[#C2714F]/90 text-white rounded-xl h-12 font-bold shadow-md"
-          onClick={onClose}
+          className="w-full bg-[#C2714F] hover:bg-[#a65d3f] text-white rounded-xl h-12 font-bold shadow-md transition-transform active:scale-[0.98]"
+          onClick={handleSave}
         >
           Salvar Alterações
         </Button>
