@@ -21,6 +21,7 @@ import {
   FileText,
   BookOpen,
   PanelLeft,
+  PanelLeftClose,
   Plus,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -53,7 +54,7 @@ function AppSidebar() {
         className={cn(
           'shrink-0 transition-all duration-200 ease-in-out border-b border-[#E8E2D9]',
           'flex flex-row items-center justify-between p-4 px-6 h-20',
-          'group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:gap-3 group-data-[collapsible=icon]:py-4 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:h-auto',
+          'group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:gap-3 group-data-[collapsible=icon]:py-3 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:h-auto',
         )}
       >
         {/* Expanded View */}
@@ -74,8 +75,8 @@ function AppSidebar() {
             >
               <Plus size={18} />
             </button>
-            <div className="text-[#8C7B6C] shrink-0">
-              <PanelLeft size={20} />
+            <div className="text-[#8C7B6C] shrink-0 flex items-center justify-center w-8 h-8">
+              <PanelLeftClose size={20} />
             </div>
           </div>
         </div>

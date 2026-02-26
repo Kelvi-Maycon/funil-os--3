@@ -175,7 +175,7 @@ export default function RichTextEditor({
   const [imageUrl, setImageUrl] = useState('')
   const [savedRange, setSavedRange] = useState<Range | null>(null)
   const [editingCanvasId, setEditingCanvasId] = useState<string | null>(null)
-  const [isOutlineOpen, setIsOutlineOpen] = useState(true)
+  const [isOutlineOpen, setIsOutlineOpen] = useState(false)
   const [activeTableNode, setActiveTableNode] =
     useState<HTMLTableElement | null>(null)
   const [activeTableCell, setActiveTableCell] =
@@ -632,58 +632,60 @@ export default function RichTextEditor({
     >
       {/* GUIAS DO DOCUMENTO (OUTLINE) */}
       <div
+        onMouseEnter={() => setIsOutlineOpen(true)}
+        onMouseLeave={() => setIsOutlineOpen(false)}
         className={cn(
-          'hidden xl:flex shrink-0 bg-transparent flex-col transition-all duration-300 border-r border-slate-200/50',
-          isOutlineOpen ? 'w-64' : 'w-[60px] items-center',
+          'hidden xl:flex shrink-0 bg-transparent flex-col transition-all duration-200 ease-in-out border-r border-slate-200/50',
+          isOutlineOpen ? 'w-64' : 'w-[56px] items-center',
         )}
       >
         <div
           className={cn(
-            'flex flex-col py-5 w-full',
-            isOutlineOpen ? 'px-6' : 'px-0 items-center',
+            'flex flex-col w-full transition-all duration-200 ease-in-out',
+            isOutlineOpen ? 'py-5 px-6 gap-4' : 'py-3 px-0 items-center gap-3',
           )}
         >
-          <div
-            className={cn(
-              'flex items-center w-full',
-              isOutlineOpen ? 'justify-between' : 'justify-center',
-            )}
-          >
-            {isOutlineOpen && (
-              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 whitespace-nowrap overflow-hidden">
-                <List size={16} className="text-primary shrink-0" /> Guias no
-                documento
-              </h3>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0 rounded-lg hover:bg-slate-200/50"
-              onClick={() => setIsOutlineOpen(!isOutlineOpen)}
-              title={
-                isOutlineOpen ? 'Ocultar guias' : 'Sua estrutura de documento'
-              }
-            >
-              {isOutlineOpen ? (
-                <PanelLeftClose size={16} />
-              ) : (
-                <PanelLeft size={16} />
-              )}
-            </Button>
-          </div>
-
-          {isOutlineOpen && (
-            <div className="mt-4 flex w-full">
+          {isOutlineOpen ? (
+            <>
+              <div className="flex items-center w-full justify-between">
+                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 whitespace-nowrap overflow-hidden">
+                  <List size={16} className="text-primary shrink-0" /> Guias no
+                  documento
+                </h3>
+                <div className="h-8 w-8 flex items-center justify-center text-muted-foreground shrink-0 rounded-lg">
+                  <PanelLeftClose size={16} />
+                </div>
+              </div>
+              <div className="flex w-full">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 shadow-sm flex-1 font-semibold text-xs border-dashed text-muted-foreground hover:text-foreground hover:border-solid hover:border-primary/50 hover:bg-primary/5"
+                  onClick={insertNewGuide}
+                  title="Adicionar novo título"
+                >
+                  <Plus size={14} className="mr-1.5" /> Adicionar Guia
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="h-8 w-8 flex items-center justify-center text-muted-foreground shrink-0 rounded-lg">
+                <PanelLeft size={20} />
+              </div>
               <Button
+                size="icon"
                 variant="outline"
-                size="sm"
-                className="h-8 shadow-sm flex-1 font-semibold text-xs border-dashed text-muted-foreground hover:text-foreground hover:border-solid hover:border-primary/50 hover:bg-primary/5"
+                className="h-8 w-8 shrink-0 rounded-lg border-dashed text-muted-foreground hover:text-foreground hover:border-solid hover:border-primary/50 hover:bg-primary/5"
                 onClick={insertNewGuide}
-                title="Adicionar novo título"
+                title="Adicionar Guia"
               >
-                <Plus size={14} className="mr-1.5" /> Adicionar Guia
+                <Plus size={16} />
               </Button>
-            </div>
+              <div className="h-8 w-8 flex items-center justify-center text-primary/50 shrink-0">
+                <List size={18} />
+              </div>
+            </>
           )}
         </div>
 
