@@ -2,6 +2,7 @@ import { createStore } from './main'
 
 export type EntityType =
   | 'task'
+  | 'project'
   | 'canvas'
   | 'document'
   | 'asset'
