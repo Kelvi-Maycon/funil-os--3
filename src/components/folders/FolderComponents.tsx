@@ -14,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -153,6 +154,9 @@ export function CreateFolderDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Criar Nova Pasta</DialogTitle>
+          <DialogDescription className="sr-only">
+            Insira o nome para a nova pasta.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSave} className="space-y-4 pt-4">
           <Input
@@ -197,6 +201,9 @@ export function MoveDialog({
       <DialogContent onClick={(e) => e.stopPropagation()}>
         <DialogHeader>
           <DialogTitle>Mover Item</DialogTitle>
+          <DialogDescription className="sr-only">
+            Selecione a pasta de destino para mover o item.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 pt-4">
           <Select value={selected} onValueChange={setSelected}>

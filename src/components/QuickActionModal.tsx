@@ -242,9 +242,13 @@ export default function QuickActionModal() {
           <DialogTitle className="text-[28px] font-bold text-[#3D2B1F] leading-tight">
             {isCreate ? 'Ação Rápida' : `Editar ${currentTypeLabel}`}
           </DialogTitle>
-          {isCreate && (
+          {isCreate ? (
             <DialogDescription className="text-[15px] text-[#8C7B6C] mt-1">
               O que você deseja criar agora?
+            </DialogDescription>
+          ) : (
+            <DialogDescription className="sr-only">
+              Edite as informações do item selecionado.
             </DialogDescription>
           )}
         </DialogHeader>

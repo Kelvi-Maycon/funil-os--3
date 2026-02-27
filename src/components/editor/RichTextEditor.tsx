@@ -33,6 +33,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import {
@@ -953,6 +954,9 @@ export default function RichTextEditor({
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Adicionar Imagem</DialogTitle>
+                    <DialogDescription className="sr-only">
+                      Insira a URL da imagem que deseja adicionar ao documento.
+                    </DialogDescription>
                   </DialogHeader>
                   <form onSubmit={insertImage} className="space-y-4 pt-4">
                     <Input
@@ -1004,6 +1008,10 @@ export default function RichTextEditor({
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
                     <DialogTitle>Selecionar Canvas</DialogTitle>
+                    <DialogDescription className="sr-only">
+                      Selecione um funil/canvas da lista para importar sua
+                      visualização.
+                    </DialogDescription>
                   </DialogHeader>
                   <div className="grid grid-cols-2 gap-4 py-4 max-h-[60vh] overflow-y-auto px-1">
                     {funnels.map((f) => (

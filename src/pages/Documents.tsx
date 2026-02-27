@@ -22,6 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
@@ -228,6 +229,9 @@ export default function Documents() {
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>Criar Nova Pasta</DialogTitle>
+                      <DialogDescription className="sr-only">
+                        Insira o nome da nova pasta.
+                      </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={createFolder} className="space-y-4 pt-6">
                       <Input
