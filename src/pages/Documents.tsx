@@ -187,8 +187,6 @@ export default function Documents() {
   return (
     <div className="flex h-full bg-background overflow-hidden animate-fade-in">
       <div
-        onMouseEnter={() => setIsSidebarOpen(true)}
-        onMouseLeave={() => setIsSidebarOpen(false)}
         className={cn(
           'border-r border-border bg-card flex flex-col shrink-0 z-10 shadow-sm transition-all duration-200 ease-in-out',
           isSidebarOpen ? 'w-72' : 'w-[56px]',
@@ -206,9 +204,13 @@ export default function Documents() {
                 <span className="font-semibold text-sm text-foreground px-2">
                   Pastas
                 </span>
-                <div className="h-8 w-8 flex items-center justify-center text-muted-foreground shrink-0 rounded-lg">
+                <button
+                  onClick={() => setIsSidebarOpen(false)}
+                  className="h-8 w-8 flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground shrink-0 rounded-lg transition-colors cursor-pointer outline-none"
+                  title="Minimizar menu"
+                >
                   <PanelLeftClose size={16} />
-                </div>
+                </button>
               </div>
               <div className="flex flex-col gap-2 w-full animate-fade-in">
                 <Button
@@ -250,9 +252,13 @@ export default function Documents() {
             </>
           ) : (
             <>
-              <div className="h-8 w-8 flex items-center justify-center text-muted-foreground shrink-0">
+              <button
+                onClick={() => setIsSidebarOpen(true)}
+                className="h-8 w-8 flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground shrink-0 rounded-lg transition-colors cursor-pointer outline-none"
+                title="Expandir menu"
+              >
                 <PanelLeft size={20} />
-              </div>
+              </button>
               <Button
                 size="icon"
                 variant="default"
@@ -262,12 +268,13 @@ export default function Documents() {
               >
                 <Plus size={18} />
               </Button>
-              <div
-                className="h-10 w-10 rounded-xl bg-muted/50 flex items-center justify-center text-muted-foreground shrink-0"
-                title="Pastas ocultas"
+              <button
+                onClick={() => setIsSidebarOpen(true)}
+                className="h-10 w-10 rounded-xl bg-muted/50 hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground shrink-0 transition-colors cursor-pointer outline-none"
+                title="Ver Pastas"
               >
                 <FolderIcon size={20} className="opacity-50" />
-              </div>
+              </button>
             </>
           )}
         </div>
