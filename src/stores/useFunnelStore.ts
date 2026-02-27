@@ -18,6 +18,8 @@ export const mockFunnels: Funnel[] = [
         data: {
           name: 'Meta Ads',
           subtitle: 'Campanha de Conversão',
+          linkedAssetIds: ['a1', 'a2'],
+          linkedDocumentIds: ['d1'],
           metrics: [
             { label: 'CTR', value: '2.4%' },
             { label: 'Cliques', value: '1.243' },
@@ -32,6 +34,8 @@ export const mockFunnels: Funnel[] = [
         data: {
           name: 'Página de Captura',
           subtitle: 'Opt-in Principal',
+          linkedTaskIds: ['t1', 't2'],
+          isTaskMode: true,
           metrics: [
             { label: 'Views', value: '1.200' },
             { label: 'Leads', value: '450' },
@@ -48,6 +52,8 @@ export const mockFunnels: Funnel[] = [
           name: 'Vídeo de Vendas',
           subtitle: 'Página VSL Principal',
           retention: '62%',
+          linkedDocumentIds: ['d2'],
+          linkedTaskIds: ['t3'],
           metrics: [
             { label: 'Plays', value: '420' },
             { label: 'Vendas', value: '24' },

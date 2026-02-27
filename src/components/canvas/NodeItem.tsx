@@ -4,6 +4,8 @@ import { Node, Task } from '@/types'
 import { cn } from '@/lib/utils'
 import useTaskStore from '@/stores/useTaskStore'
 import useFunnelStore from '@/stores/useFunnelStore'
+import useDocumentStore from '@/stores/useDocumentStore'
+import useAssetStore from '@/stores/useAssetStore'
 import {
   Megaphone,
   LayoutTemplate,
@@ -105,6 +107,8 @@ export default function NodeItem({
 
   const [tasks, setTasks] = useTaskStore()
   const [funnels] = useFunnelStore()
+  const [documents] = useDocumentStore()
+  const [assets] = useAssetStore()
   const [newTaskTitle, setNewTaskTitle] = useState('')
   const [isAddingTask, setIsAddingTask] = useState(false)
 
@@ -124,9 +128,24 @@ export default function NodeItem({
   }
 
   const funnel = funnels.find((f) => f.nodes.some((n) => n.id === node.id))
+
   const linkedTasks = tasks.filter(
     (t) => t.nodeId === node.id || node.data.linkedTaskIds?.includes(t.id),
   )
+
+  const docIds = new Set(node.data.linkedDocumentIds || [])
+  documents.forEach((d) => {
+    if (d.nodeId === node.id) docIds.add(d.id)
+  })
+  const hasDocs = docIds.size > 0
+
+  const assetIds = new Set(node.data.linkedAssetIds || [])
+  assets.forEach((a) => {
+    if ((a as any).nodeId === node.id) assetIds.add(a.id)
+  })
+  const hasAssets = assetIds.size > 0
+
+  const hasTasks = linkedTasks.length > 0
 
   const isPanMode = activeTool === 'Pan'
   const isSelectMode = activeTool === 'Select'
@@ -769,6 +788,64 @@ export default function NodeItem({
           </span>
         </div>
       </div>
+
+      {(hasDocs || hasAssets || hasTasks) && (
+        <div className="flex items-center gap-2 mt-1">
+          {hasDocs && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div
+                  className={cn(
+                    'flex items-center justify-center w-7 h-7 rounded-lg border shadow-sm transition-transform hover:scale-105 cursor-help',
+                    isTraffic && !customColor
+                      ? 'bg-white/10 border-white/20 text-white'
+                      : 'bg-[#FAF7F2] border-[#E8E2D9] text-[#8C7B6C]',
+                  )}
+                >
+                  <FileText size={14} strokeWidth={2.5} />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                Documentos vinculados
+              </TooltipContent>
+            </Tooltip>
+          )}
+          {hasAssets && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div
+                  className={cn(
+                    'flex items-center justify-center w-7 h-7 rounded-lg border shadow-sm transition-transform hover:scale-105 cursor-help',
+                    isTraffic && !customColor
+                      ? 'bg-white/10 border-white/20 text-white'
+                      : 'bg-[#FAF7F2] border-[#E8E2D9] text-[#8C7B6C]',
+                  )}
+                >
+                  <ImageIcon size={14} strokeWidth={2.5} />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">Ativos vinculados</TooltipContent>
+            </Tooltip>
+          )}
+          {hasTasks && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div
+                  className={cn(
+                    'flex items-center justify-center w-7 h-7 rounded-lg border shadow-sm transition-transform hover:scale-105 cursor-help',
+                    isTraffic && !customColor
+                      ? 'bg-white/10 border-white/20 text-white'
+                      : 'bg-[#FAF7F2] border-[#E8E2D9] text-[#8C7B6C]',
+                  )}
+                >
+                  <CheckSquare size={14} strokeWidth={2.5} />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">Tarefas associadas</TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+      )}
 
       {node.data.isTaskMode && (
         <div className="mt-2 flex flex-col gap-1.5">
