@@ -633,8 +633,6 @@ export default function RichTextEditor({
     >
       {/* GUIAS DO DOCUMENTO (OUTLINE) */}
       <div
-        onMouseEnter={() => setIsOutlineOpen(true)}
-        onMouseLeave={() => setIsOutlineOpen(false)}
         className={cn(
           'hidden xl:flex shrink-0 bg-transparent flex-col transition-all duration-200 ease-in-out border-r border-slate-200/50',
           isOutlineOpen ? 'w-64' : 'w-[56px] items-center',
@@ -653,9 +651,13 @@ export default function RichTextEditor({
                   <List size={16} className="text-primary shrink-0" /> Guias no
                   documento
                 </h3>
-                <div className="h-8 w-8 flex items-center justify-center text-muted-foreground shrink-0 rounded-lg">
+                <button
+                  onClick={() => setIsOutlineOpen(false)}
+                  className="h-8 w-8 flex items-center justify-center text-muted-foreground shrink-0 rounded-lg hover:bg-slate-100 cursor-pointer outline-none transition-colors"
+                  title="Minimizar Guias"
+                >
                   <PanelLeftClose size={16} />
-                </div>
+                </button>
               </div>
               <div className="flex w-full">
                 <Button
@@ -671,9 +673,13 @@ export default function RichTextEditor({
             </>
           ) : (
             <>
-              <div className="h-8 w-8 flex items-center justify-center text-muted-foreground shrink-0 rounded-lg">
+              <button
+                onClick={() => setIsOutlineOpen(true)}
+                className="h-8 w-8 flex items-center justify-center text-muted-foreground shrink-0 rounded-lg hover:bg-slate-100 cursor-pointer outline-none transition-colors"
+                title="Expandir Guias"
+              >
                 <PanelLeft size={20} />
-              </div>
+              </button>
               <Button
                 size="icon"
                 variant="outline"
@@ -683,9 +689,13 @@ export default function RichTextEditor({
               >
                 <Plus size={16} />
               </Button>
-              <div className="h-8 w-8 flex items-center justify-center text-primary/50 shrink-0">
+              <button
+                onClick={() => setIsOutlineOpen(true)}
+                className="h-8 w-8 flex items-center justify-center text-primary/50 shrink-0 hover:bg-slate-100 rounded-lg cursor-pointer outline-none transition-colors"
+                title="Ver Guias"
+              >
                 <List size={18} />
-              </div>
+              </button>
             </>
           )}
         </div>
