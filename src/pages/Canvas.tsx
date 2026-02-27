@@ -20,8 +20,8 @@ export default function Canvas() {
   }
 
   return (
-    <div className="h-full flex flex-col overflow-hidden animate-fade-in bg-[#FAF7F2] relative">
-      <div className="flex-1 relative flex overflow-hidden">
+    <div className="flex-1 w-full h-full flex flex-col overflow-hidden animate-fade-in bg-[#FAF7F2] relative">
+      <div className="flex-1 w-full h-full relative flex overflow-hidden">
         <CanvasBoard funnel={funnel} onChange={updateFunnel} />
       </div>
     </div>

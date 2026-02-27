@@ -11,6 +11,7 @@ import {
   CheckSquare,
   Image as ImageIcon,
   Plus,
+  Settings,
 } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import useDocumentStore from '@/stores/useDocumentStore'
@@ -170,7 +171,7 @@ export default function RightPanel({
   return (
     <div
       className={cn(
-        'w-80 bg-white border-l border-[#E8E2D9] flex flex-col shadow-2xl z-30 shrink-0 absolute right-0 bottom-0 rounded-tl-2xl transition-all',
+        'w-full sm:w-80 max-w-full bg-white border-l border-[#E8E2D9] flex flex-col shadow-2xl z-30 shrink-0 absolute right-0 bottom-0 rounded-tl-2xl transition-all',
         hideHeader ? 'top-0' : 'top-20',
       )}
     >
@@ -201,30 +202,34 @@ export default function RightPanel({
         onValueChange={setActiveTab}
         className="flex-1 flex flex-col min-h-0 overflow-hidden"
       >
-        <TabsList className="mx-6 mt-6 grid grid-cols-4 bg-[#FAF7F2] p-1 rounded-xl border border-[#E8E2D9]">
+        <TabsList className="mx-6 mt-6 grid grid-cols-4 gap-1 bg-[#FAF7F2] p-1 rounded-xl border border-[#E8E2D9]">
           <TabsTrigger
             value="details"
-            className="text-[11px] font-bold rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#C2714F] data-[state=active]:shadow-sm"
+            className="text-[10px] sm:text-[11px] font-bold rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#C2714F] data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 py-1.5"
           >
-            Conf
+            <Settings size={14} />{' '}
+            <span className="hidden sm:inline">Conf</span>
           </TabsTrigger>
           <TabsTrigger
             value="content"
-            className="text-[11px] font-bold rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#C2714F] data-[state=active]:shadow-sm"
+            className="text-[10px] sm:text-[11px] font-bold rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#C2714F] data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 py-1.5"
           >
-            Docs
+            <FileText size={14} />{' '}
+            <span className="hidden sm:inline">Docs</span>
           </TabsTrigger>
           <TabsTrigger
             value="tasks"
-            className="text-[11px] font-bold rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#C2714F] data-[state=active]:shadow-sm"
+            className="text-[10px] sm:text-[11px] font-bold rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#C2714F] data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 py-1.5"
           >
-            Tasks
+            <CheckSquare size={14} />{' '}
+            <span className="hidden sm:inline">Tasks</span>
           </TabsTrigger>
           <TabsTrigger
             value="resources"
-            className="text-[11px] font-bold rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#C2714F] data-[state=active]:shadow-sm"
+            className="text-[10px] sm:text-[11px] font-bold rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#C2714F] data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 py-1.5"
           >
-            Assets
+            <ImageIcon size={14} />{' '}
+            <span className="hidden sm:inline">Assets</span>
           </TabsTrigger>
         </TabsList>
 

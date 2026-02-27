@@ -29,6 +29,8 @@ import {
   FileText,
   Link as LinkIcon,
   Image as ImageIcon,
+  Settings,
+  CheckSquare,
 } from 'lucide-react'
 import { generateId } from '@/lib/generateId'
 import { cn } from '@/lib/utils'
@@ -118,30 +120,30 @@ export function NodeSettingsModal({
         </DialogHeader>
 
         <Tabs defaultValue="conf" className="w-full flex-1">
-          <TabsList className="flex w-full bg-[#FAF7F2] rounded-full p-1.5 mb-6 h-auto">
+          <TabsList className="flex w-full bg-[#FAF7F2] rounded-full p-1.5 mb-6 h-auto gap-1">
             <TabsTrigger
               value="conf"
-              className="flex-1 rounded-full text-xs py-2 font-bold text-[#8C7B6C] data-[state=active]:bg-white data-[state=active]:text-[#3D2B1F] data-[state=active]:shadow-sm transition-all"
+              className="flex-1 rounded-full text-[11px] py-2 font-bold text-[#8C7B6C] data-[state=active]:bg-white data-[state=active]:text-[#3D2B1F] data-[state=active]:shadow-sm transition-all flex items-center justify-center gap-1.5"
             >
-              Conf
+              <Settings size={14} /> Conf
             </TabsTrigger>
             <TabsTrigger
               value="docs"
-              className="flex-1 rounded-full text-xs py-2 font-bold text-[#8C7B6C] data-[state=active]:bg-white data-[state=active]:text-[#3D2B1F] data-[state=active]:shadow-sm transition-all"
+              className="flex-1 rounded-full text-[11px] py-2 font-bold text-[#8C7B6C] data-[state=active]:bg-white data-[state=active]:text-[#3D2B1F] data-[state=active]:shadow-sm transition-all flex items-center justify-center gap-1.5"
             >
-              Docs
+              <FileText size={14} /> Docs
             </TabsTrigger>
             <TabsTrigger
               value="tasks"
-              className="flex-1 rounded-full text-xs py-2 font-bold text-[#8C7B6C] data-[state=active]:bg-white data-[state=active]:text-[#3D2B1F] data-[state=active]:shadow-sm transition-all"
+              className="flex-1 rounded-full text-[11px] py-2 font-bold text-[#8C7B6C] data-[state=active]:bg-white data-[state=active]:text-[#3D2B1F] data-[state=active]:shadow-sm transition-all flex items-center justify-center gap-1.5"
             >
-              Tasks
+              <CheckSquare size={14} /> Tasks
             </TabsTrigger>
             <TabsTrigger
               value="assets"
-              className="flex-1 rounded-full text-xs py-2 font-bold text-[#8C7B6C] data-[state=active]:bg-white data-[state=active]:text-[#3D2B1F] data-[state=active]:shadow-sm transition-all"
+              className="flex-1 rounded-full text-[11px] py-2 font-bold text-[#8C7B6C] data-[state=active]:bg-white data-[state=active]:text-[#3D2B1F] data-[state=active]:shadow-sm transition-all flex items-center justify-center gap-1.5"
             >
-              Assets
+              <ImageIcon size={14} /> Assets
             </TabsTrigger>
           </TabsList>
 

@@ -947,7 +947,7 @@ export default function CanvasBoard({
   }, [funnel.nodes])
 
   return (
-    <div className="flex-1 flex relative overflow-hidden bg-transparent">
+    <div className="flex-1 w-full h-full flex relative overflow-hidden bg-transparent">
       {!hideHeader && (
         <header className="absolute top-0 left-0 right-0 h-20 bg-white border-b border-[#E8E2D9] px-6 flex items-center justify-between z-40">
           <div className="flex items-center gap-4">
@@ -1288,7 +1288,7 @@ export default function CanvasBoard({
       <div
         ref={boardRef}
         className={cn(
-          'flex-1 relative canvas-container overflow-hidden canvas-grid',
+          'flex-1 w-full h-full relative canvas-container overflow-hidden canvas-grid',
           isPanning
             ? 'cursor-grabbing'
             : isSpacePressed || activeTool === 'Pan'
